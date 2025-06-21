@@ -157,28 +157,6 @@ const Footer = () => {
             </div>
           </div>
         </div>
-
-        {/* Leriman Leitiko Tribute */}
-        <div className="border-t border-gray-700 mt-16 pt-12">
-          <div className="max-w-4xl mx-auto text-center">
-            <h4 className="text-2xl font-light mb-4 text-gray-200">
-              Honoring Our Elder
-            </h4>
-            <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-8 mb-6">
-              <h5 className="text-xl font-semibold mb-2 text-green-400">
-                Leriman Leitiko
-              </h5>
-              <p className="text-gray-300 mb-4">
-                Elder, Church Leader & Guardian of Yaakunte
-              </p>
-            </div>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Through his unwavering dedication, Leriman Leitiko has transformed
-              despair into hope, ensuring that the Yaaku culture will not only
-              survive but thrive for generations to come.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Bottom Footer */}
