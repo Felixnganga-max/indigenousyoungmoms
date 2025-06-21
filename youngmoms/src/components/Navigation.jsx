@@ -27,11 +27,12 @@ const Navigation = () => {
   }, []);
 
   const navItems = [
-    { id: "home", label: "Home", href: "#home" },
-    { id: "about", label: "About", href: "#about" },
-    { id: "events", label: "Events", href: "#events" },
-    { id: "projects", label: "Projects", href: "#projects" },
-    { id: "contact", label: "Contact", href: "#contact" },
+    { id: "home", label: "Home", href: "/" },
+    { id: "about", label: "About", href: "/about" },
+    { id: "missions", label: "Missions", href: "/missions" },
+    { id: "events", label: "Events", href: "/events" },
+    { id: "projects", label: "Projects", href: "/projects" },
+    { id: "contact", label: "Contact", href: "/contact" },
   ];
 
   return (
