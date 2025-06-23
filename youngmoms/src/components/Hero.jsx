@@ -136,7 +136,7 @@ const Hero = () => {
               </h1>
 
               {/* Subtitle - UPDATED for Yaaku Mission */}
-              <p className="text-lg md:text-xl text-gray-100 mb-8 max-w-2xl leading-relaxed font-medium">
+              <p className="text-lg md:text-xl text-gray-100 mb-8 max-w-2xl leading-relaxed font-small">
                 Reviving the endangered Yaakunte language and preserving Yaaku
                 culture while empowering indigenous young mothers in Mukogodo
                 Forest. Protecting 74,000 acres of ancestral forest and building
@@ -160,8 +160,8 @@ const Hero = () => {
         </div>
 
         {/* Stats Section - UPDATED for Yaaku Statistics */}
-        <div className="absolute bottom-20 left-0 right-0 z-10">
-          <div className="max-w-7xl mx-auto px-6">
+        <div className="absolute bottom-20 left-0 mt-16 right-0 z-10">
+          <div className="max-w-7xl mx-auto mt-16 px-6">
             <div className="bg-gradient-to-r from-purple-900/80 via-blue-900/60 to-cyan-900/40 backdrop-blur-md rounded-2xl border border-white/10 p-8 max-w-4xl">
               <div className="grid grid-cols-3 gap-8">
                 <div className="text-center">
