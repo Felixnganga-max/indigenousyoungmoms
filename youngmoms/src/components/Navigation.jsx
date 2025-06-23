@@ -178,10 +178,10 @@ const Navigation = () => {
             </button>
           </div>
 
-          {/* Mobile Menu - Compact */}
+          {/* Mobile Menu - Fixed with proper height */}
           <div
             className={`md:hidden transition-all duration-300 ease-out overflow-hidden ${
-              isMenuOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
+              isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
             }`}
           >
             <div className="pb-4">
@@ -197,7 +197,7 @@ const Navigation = () => {
                         // In a real app, you'd use React Router here
                         window.location.href = item.href;
                       }}
-                      className={`block px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                         activeItem === item.id
                           ? "bg-emerald-500/90 text-white"
                           : "text-emerald-100 hover:text-white hover:bg-emerald-600/50"
@@ -207,9 +207,9 @@ const Navigation = () => {
                     </a>
                   ))}
 
-                  <div className="pt-3 border-t border-emerald-600/30 mt-3">
+                  <div className="pt-4 border-t border-emerald-600/30 mt-4">
                     <button
-                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:from-orange-400 hover:to-orange-500 group"
+                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 hover:from-orange-400 hover:to-orange-500 group"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <div className="flex items-center justify-center space-x-2">
@@ -219,12 +219,12 @@ const Navigation = () => {
                     </button>
 
                     {/* Trust indicators - compact */}
-                    <div className="mt-3 flex items-center justify-center space-x-3 text-emerald-100 text-xs">
-                      <div className="flex items-center space-x-1">
+                    <div className="mt-4 flex items-center justify-center space-x-4 text-emerald-100 text-xs">
+                      <div className="flex items-center space-x-1.5">
                         <CheckCircle className="w-3 h-3 text-emerald-200" />
                         <span>Verified</span>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1.5">
                         <Heart className="w-3 h-3 text-emerald-200 animate-pulse" />
                         <span>99.9%</span>
                       </div>
