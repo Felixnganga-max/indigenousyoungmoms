@@ -11,12 +11,13 @@ import {
   Heart,
   CheckCircle,
 } from "lucide-react";
+import { assets } from "../assets/assets";
 
 // Navigation Component
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeItem, setActiveItem] = useState("home");
+  const [activeItem, setActiveItem] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,19 +27,49 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Set active item based on current URL path
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === "/") {
+      setActiveItem("");
+    } else if (path === "/about") {
+      setActiveItem("about");
+    } else if (path === "/missions") {
+      setActiveItem("missions");
+    } else if (path === "/gallery") {
+      setActiveItem("gallery");
+    } else if (path === "/projects") {
+      setActiveItem("projects");
+    } else if (path === "/programs") {
+      setActiveItem("programs");
+    } else if (path === "/contact") {
+      setActiveItem("contact");
+    }
+  }, []);
+
   const navItems = [
-    { id: "home", label: "Home", href: "/" },
+    { id: "missions", label: "Missions and Events", href: "/missions" },
+    { id: "gallery", label: "Gallery", href: "/gallery" },
     { id: "about", label: "About", href: "/about" },
-    { id: "missions", label: "Missions", href: "/missions" },
-    { id: "events", label: "Events", href: "/events" },
     { id: "projects", label: "Projects", href: "/projects" },
+    { id: "programs", label: "Programs", href: "/programs" },
     { id: "contact", label: "Contact", href: "/contact" },
   ];
+
+  const handleNavClick = (itemId) => {
+    setActiveItem(itemId);
+    setIsMenuOpen(false);
+  };
+
+  const handleLogoClick = () => {
+    setActiveItem("");
+    setIsMenuOpen(false);
+  };
 
   return (
     <>
       {/* Minimal floating particles */}
-      <div className="fixed top-0 left-0 w-full h-16 z-40 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 left-0 w-full h-24 z-40 pointer-events-none overflow-hidden">
         <div
           className="absolute top-2 left-1/4 w-1 h-1 bg-emerald-300/20 rounded-full animate-pulse"
           style={{ animationDelay: "0s" }}
@@ -68,11 +99,19 @@ const Navigation = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            {/* Compact Logo */}
-            <div className="flex items-center space-x-2 group cursor-pointer">
+            {/* Logo with Image - Now clickable for Home */}
+            <a
+              href="/"
+              onClick={handleLogoClick}
+              className="flex items-center space-x-3 group cursor-pointer"
+            >
               <div className="relative">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center transform transition-all duration-200 group-hover:scale-105 shadow-md">
-                  <Shield className="w-4 h-4 text-white" />
+                <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden transform transition-all duration-200 group-hover:scale-105 shadow-md border border-white/20">
+                  <img
+                    src={assets.logoImage}
+                    alt="Indigenous Young Moms Logo"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full flex items-center justify-center border border-white">
                   <CheckCircle className="w-1.5 h-1.5 text-white" />
@@ -86,7 +125,7 @@ const Navigation = () => {
                   Empowering communities
                 </span>
               </div>
-            </div>
+            </a>
 
             {/* Desktop Menu - Compact */}
             <div className="hidden md:flex items-center space-x-1 bg-black/5 backdrop-blur-sm rounded-full px-3 py-1.5 border border-emerald-200/20">
@@ -94,7 +133,12 @@ const Navigation = () => {
                 <a
                   key={item.id}
                   href={item.href}
-                  onClick={() => setActiveItem(item.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(item.id);
+                    // In a real app, you'd use React Router here
+                    window.location.href = item.href;
+                  }}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     activeItem === item.id
                       ? "bg-emerald-400/80 text-white shadow-lg"
@@ -116,14 +160,8 @@ const Navigation = () => {
                 </span>
               </div>
 
-              {/* Blue CTA Button */}
-              {/* <button className="group relative bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:from-blue-400 hover:to-blue-500">
-                <div className="flex items-center space-x-1.5">
-                  <span>Start Journey</span>
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </div>
-              </button> */}
-              <button className="group relative bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:from-blue-400 hover:to-blue-500">
+              {/* My Account Button */}
+              <button className="group relative bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:from-orange-400 hover:to-orange-500">
                 <div className="flex items-center space-x-1.5">
                   <span>My Account</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -153,9 +191,11 @@ const Navigation = () => {
                     <a
                       key={item.id}
                       href={item.href}
-                      onClick={() => {
-                        setActiveItem(item.id);
-                        setIsMenuOpen(false);
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavClick(item.id);
+                        // In a real app, you'd use React Router here
+                        window.location.href = item.href;
                       }}
                       className={`block px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                         activeItem === item.id
@@ -169,11 +209,11 @@ const Navigation = () => {
 
                   <div className="pt-3 border-t border-emerald-600/30 mt-3">
                     <button
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:from-blue-400 hover:to-blue-500 group"
+                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:from-orange-400 hover:to-orange-500 group"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <div className="flex items-center justify-center space-x-2">
-                        <span>Start Journey</span>
+                        <span>My Account</span>
                         <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                       </div>
                     </button>

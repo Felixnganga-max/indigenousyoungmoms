@@ -66,16 +66,17 @@ const Footer = () => {
             </h4>
             <nav className="space-y-3">
               {[
-                "Home",
+                "",
                 "About",
                 "Missions",
-                "Events",
+                "Gallery",
                 "Projects",
+                "Programs",
                 "Contact",
               ].map((item) => (
                 <a
                   key={item}
-                  href={`#${item.toLowerCase()}`}
+                  href={`/${item.toLowerCase()}`}
                   className="block text-gray-300 hover:text-green-400 transition-colors duration-200"
                 >
                   {item}
@@ -89,13 +90,13 @@ const Footer = () => {
               </h5>
               <div className="space-y-2">
                 <a
-                  href="#support"
+                  href="/contact"
                   className="block text-green-400 hover:text-green-300 transition-colors"
                 >
                   Support Our Mission
                 </a>
                 <a
-                  href="#learn"
+                  href="/contact"
                   className="block text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   Learn Yaakunte

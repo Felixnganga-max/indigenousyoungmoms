@@ -18,6 +18,7 @@ import {
   Sparkles,
   ChevronLeft,
 } from "lucide-react";
+import Leriman from "../components/Leriman";
 
 const About = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -653,6 +654,7 @@ const About = () => {
           </div>
         </div>
       </section>
+      <Leriman />
 
       {/* Call to Action Section */}
       <section className="py-68 px-4 relative">

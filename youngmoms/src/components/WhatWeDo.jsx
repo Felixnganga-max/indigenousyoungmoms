@@ -4,25 +4,14 @@ import {
   Languages,
   TreePine,
   Users,
-  Globe,
   Heart,
-  Sparkles,
   Phone,
   BookOpen,
-  Shield,
-  Leaf,
 } from "lucide-react";
 
 const WhatWeDo = () => {
-  const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [hoveredCard, setHoveredCard] = useState(null);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -84,7 +73,7 @@ const WhatWeDo = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 overflow-hidden">
+    <div className="relative min-h-screen bg-white">
       {/* Enhanced Custom Styles */}
       <style
         dangerouslySetInnerHTML={{
@@ -111,39 +100,12 @@ const WhatWeDo = () => {
             }
           }
           
-          @keyframes shimmer {
-            0% {
-              background-position: -200% 0;
-            }
-            100% {
-              background-position: 200% 0;
-            }
-          }
-          
           @keyframes float {
             0%, 100% {
               transform: translateY(0px);
             }
             50% {
               transform: translateY(-10px);
-            }
-          }
-          
-          @keyframes glow {
-            0%, 100% {
-              box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-            }
-            50% {
-              box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
-            }
-          }
-          
-          @keyframes goldShimmer {
-            0% {
-              background-position: -200% 0;
-            }
-            100% {
-              background-position: 200% 0;
             }
           }
           
@@ -155,239 +117,170 @@ const WhatWeDo = () => {
             animation: fadeInScale 0.8s ease-out forwards;
           }
           
-          .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-          }
-          
-          .animate-gold-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
-            background-size: 200% 100%;
-            animation: goldShimmer 3s infinite;
-          }
-          
           .animate-float {
             animation: float 3s ease-in-out infinite;
           }
           
-          .animate-glow {
-            animation: glow 2s ease-in-out infinite;
-          }
-          
-          .glass-effect {
-            backdrop-filter: blur(25px);
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          }
-          
           .card-hover {
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
           
           .card-hover:hover {
-            transform: translateY(-20px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
           }
           
           html {
             scroll-behavior: smooth;
           }
           
-          .parallax-bg {
-            will-change: transform;
+          .subtle-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           }
           
-          .gold-accent {
-            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+          .hover-shadow {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
           }
           
-          .blue-overlay {
-            background: linear-gradient(135deg, 
-              rgba(59, 130, 246, 0.1) 0%, 
-              rgba(147, 197, 253, 0.08) 50%, 
-              rgba(59, 130, 246, 0.1) 100%);
-          }
-          
-          .content-glass {
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+          @media (max-width: 768px) {
+            .mobile-spacing {
+              padding: 1rem;
+            }
           }
         `,
         }}
       />
 
       {/* Main Section */}
-      <div className="relative py-24" id="whatwedo" data-animate>
-        {/* Full Background Image */}
-        <div
-          className="fixed inset-0 parallax-bg"
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&crop=entropy&auto=format&q=80)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-            transform: `translateY(${scrollY * 0.2}px)`,
-            zIndex: -2,
-          }}
-        />
-
-        {/* Subtle Blue Overlay */}
-        <div className="fixed inset-0 blue-overlay" style={{ zIndex: -1 }} />
-
-        {/* Main Content Container with Glass Effect */}
-        <div className="relative content-glass rounded-3xl mx-4 md:mx-8 shadow-2xl">
-          {/* Floating Elements */}
-          <div className="absolute inset-0 overflow-hidden rounded-3xl">
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1.5 h-1.5 rounded-full opacity-20"
-                style={{
-                  background: "linear-gradient(45deg, #3B82F6, #60A5FA)",
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 5}s`,
-                  animationDuration: `${4 + Math.random() * 3}s`,
-                  transform: `translateY(${
-                    scrollY * 0.05 * (Math.random() - 0.5)
-                  }px)`,
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="container mx-auto px-8 py-16 relative z-10">
-            {/* Header */}
-            <div className="text-center mb-20">
-              <div className="mb-8">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center animate-float shadow-xl">
-                  <Heart className="w-8 h-8 text-white" />
-                </div>
+      <div className="relative py-12 md:py-24" id="whatwedo" data-animate>
+        <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+          {/* Header */}
+          <div className="text-center mb-12 md:mb-20">
+            <div className="mb-6 md:mb-8">
+              <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 md:mb-6 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center animate-float subtle-shadow">
+                <Heart className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-
-              <h2
-                className={`text-5xl md:text-6xl font-bold text-slate-800 mb-6 ${
-                  isVisible.whatwedo ? "animate-fade-in-up" : "opacity-0"
-                }`}
-              >
-                What We Do
-              </h2>
-
-              <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto mb-8"></div>
-
-              <p
-                className={`text-xl text-slate-700 max-w-4xl mx-auto leading-relaxed ${
-                  isVisible.whatwedo ? "animate-fade-in-up" : "opacity-0"
-                }`}
-                style={{ animationDelay: "0.2s" }}
-              >
-                The Indigenous Young Moms is dedicated to reviving Yaaku
-                culture, protecting our environment, and empowering women while
-                building a poverty-free community where every person's dignity
-                is protected.
-              </p>
             </div>
 
-            {/* Core Areas Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-20">
-              {coreAreas.map((area, index) => (
-                <div
-                  key={area.id}
-                  className={`group relative card-hover cursor-pointer ${
-                    isVisible.whatwedo
-                      ? "animate-fade-in-scale"
-                      : "opacity-0 scale-95"
-                  }`}
-                  onMouseEnter={() => setHoveredCard(area.id)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                >
-                  <div className="relative overflow-hidden rounded-3xl glass-effect shadow-xl">
-                    {/* Image */}
-                    <div className="relative h-64 overflow-hidden">
-                      <img
-                        src={area.image}
-                        alt={area.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+            <h2
+              className={`text-3xl md:text-5xl lg:text-6xl font-bold text-slate-800 mb-4 md:mb-6 leading-tight ${
+                isVisible.whatwedo ? "animate-fade-in-up" : "opacity-0"
+              }`}
+            >
+              What We Do
+            </h2>
 
-                      {/* Stats badge */}
-                      <div className="absolute top-4 right-4">
-                        <div className="px-3 py-1 glass-effect rounded-full text-blue-600 text-sm font-medium border border-blue-200">
-                          {area.stats}
-                        </div>
-                      </div>
+            <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto mb-6 md:mb-8 rounded-full"></div>
 
-                      {/* Icon overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div
-                          className={`w-16 h-16 rounded-full bg-gradient-to-r ${area.gradient} flex items-center justify-center shadow-2xl border-2 border-white/30 animate-float`}
-                        >
-                          <area.icon className="w-8 h-8 text-white" />
-                        </div>
+            <p
+              className={`text-lg md:text-xl text-slate-700 max-w-4xl mx-auto leading-relaxed px-4 ${
+                isVisible.whatwedo ? "animate-fade-in-up" : "opacity-0"
+              }`}
+              style={{ animationDelay: "0.2s" }}
+            >
+              The Indigenous Young Moms is dedicated to reviving Yaaku culture,
+              protecting our environment, and empowering women while building a
+              poverty-free community where every person's dignity is protected.
+            </p>
+          </div>
+
+          {/* Core Areas Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-20">
+            {coreAreas.map((area, index) => (
+              <div
+                key={area.id}
+                className={`group relative card-hover cursor-pointer ${
+                  isVisible.whatwedo
+                    ? "animate-fade-in-scale"
+                    : "opacity-0 scale-95"
+                }`}
+                onMouseEnter={() => setHoveredCard(area.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{ animationDelay: `${index * 0.2}s` }}
+              >
+                <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-white subtle-shadow group-hover:hover-shadow border border-gray-100">
+                  {/* Image */}
+                  <div className="relative h-48 md:h-64 overflow-hidden">
+                    <img
+                      src={area.image}
+                      alt={area.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+
+                    {/* Stats badge */}
+                    <div className="absolute top-3 md:top-4 right-3 md:right-4">
+                      <div className="px-2 md:px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-blue-600 text-xs md:text-sm font-medium border border-blue-200">
+                        {area.stats}
                       </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-6 bg-white/80 backdrop-blur-sm">
-                      <h3 className="text-xl font-bold text-slate-800 mb-2">
-                        {area.title}
-                      </h3>
-
-                      <h4 className="text-lg font-semibold text-blue-600 mb-3">
-                        {area.subtitle}
-                      </h4>
-
-                      <p className="text-slate-600 text-sm leading-relaxed">
-                        {area.description}
-                      </p>
+                    {/* Icon overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-r ${area.gradient} flex items-center justify-center shadow-2xl border-2 border-white/30 animate-float`}
+                      >
+                        <area.icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Floating elements */}
-                  <div
-                    className={`absolute -top-2 -right-2 w-3 h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-pulse ${
-                      hoveredCard === area.id ? "scale-150" : ""
-                    } transition-transform duration-300`}
-                  />
+                  {/* Content */}
+                  <div className="p-4 md:p-6 bg-white">
+                    <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-2">
+                      {area.title}
+                    </h3>
+
+                    <h4 className="text-base md:text-lg font-semibold text-blue-600 mb-3">
+                      {area.subtitle}
+                    </h4>
+
+                    <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+                      {area.description}
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Call to Action Buttons */}
-            <div
-              className={`text-center space-y-6 ${
-                isVisible.whatwedo ? "animate-fade-in-up" : "opacity-0"
-              }`}
-              style={{ animationDelay: "0.6s" }}
-            >
-              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                {/* Learn More Button */}
-                <button className="group inline-flex items-center px-8 py-4 glass-effect hover:bg-blue-500 text-blue-600 hover:text-white rounded-full text-lg font-bold transition-all duration-300 shadow-xl hover:shadow-2xl border border-blue-200 hover:border-blue-500 hover:scale-105">
-                  <BookOpen className="w-5 h-5 mr-3" />
-                  Learn More About Us
-                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-2 transition-transform" />
-                </button>
-
-                {/* Contact Button */}
-                <button className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-full text-lg font-bold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105">
-                  <Phone className="w-5 h-5 mr-3" />
-                  Get In Touch
-                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-2 transition-transform" />
-                </button>
+                {/* Floating accent */}
+                <div
+                  className={`absolute -top-1 md:-top-2 -right-1 md:-right-2 w-2 h-2 md:w-3 md:h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-pulse ${
+                    hoveredCard === area.id ? "scale-150" : ""
+                  } transition-transform duration-300`}
+                />
               </div>
+            ))}
+          </div>
 
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Join us in preserving culture, protecting the environment, and
-                empowering communities. Together, we can create lasting change.
-              </p>
+          {/* Call to Action Buttons */}
+          <div
+            className={`text-center space-y-6 px-4 ${
+              isVisible.whatwedo ? "animate-fade-in-up" : "opacity-0"
+            }`}
+            style={{ animationDelay: "0.6s" }}
+          >
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
+              {/* Learn More Button */}
+              <a
+                href="/about"
+                className="group inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-white border-2 border-blue-500 hover:bg-blue-500 text-blue-600 hover:text-white rounded-full text-base md:text-lg font-bold transition-all duration-300 subtle-shadow hover:hover-shadow hover:scale-105 w-full sm:w-auto"
+              >
+                <BookOpen className="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3" />
+                Learn More About Us
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2 md:ml-3 group-hover:translate-x-2 transition-transform" />
+              </a>
+
+              {/* Contact Button */}
+              <a href="/contact" className="group inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-full text-base md:text-lg font-bold transition-all duration-300 subtle-shadow hover:hover-shadow hover:scale-105 w-full sm:w-auto">
+                <Phone className="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3" />
+                Get In Touch
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2 md:ml-3 group-hover:translate-x-2 transition-transform" />
+              </a>
             </div>
+
+            <p className="text-slate-600 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+              Join us in preserving culture, protecting the environment, and
+              empowering communities. Together, we can create lasting change.
+            </p>
           </div>
         </div>
       </div>
