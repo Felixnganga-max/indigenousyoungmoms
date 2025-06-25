@@ -162,10 +162,10 @@ const Navigation = () => {
 
               {/* My Account Button */}
               <button className="group relative bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:from-orange-400 hover:to-orange-500">
-                <div className="flex items-center space-x-1.5">
+                <a href="/account" className="flex items-center space-x-1.5">
                   <span>My Account</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </div>
+                </a>
               </button>
             </div>
 
@@ -212,10 +212,13 @@ const Navigation = () => {
                       className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 hover:from-orange-400 hover:to-orange-500 group"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <div className="flex items-center justify-center space-x-2">
+                      <a
+                        href="/account"
+                        className="flex items-center justify-center space-x-2"
+                      >
                         <span>My Account</span>
                         <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                      </div>
+                      </a>
                     </button>
 
                     {/* Trust indicators - compact */}
