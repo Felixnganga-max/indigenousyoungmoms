@@ -124,13 +124,79 @@ exports.getGalleryItem = async (req, res) => {
 };
 
 // Update a gallery item
+// Backend Controller Fix
 exports.updateGalleryItem = async (req, res) => {
   try {
+    // Check if ID is provided and valid
+    if (!req.params.id || req.params.id === "undefined") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or missing gallery item ID",
+      });
+    }
+
+    console.log("Updating item with ID:", req.params.id); // Debug log
+    console.log("Request body:", req.body); // Debug log
+
     const { tags, ...updateData } = req.body;
 
+    // Handle tags properly
     if (tags) {
-      updateData.tags = tags.split(",").map((tag) => tag.trim());
+      if (typeof tags === "string") {
+        // Handle stringified array case
+        if (tags.startsWith("[") && tags.endsWith("]")) {
+          try {
+            const parsedTags = JSON.parse(tags);
+            updateData.tags = Array.isArray(parsedTags)
+              ? parsedTags.filter((tag) => tag && tag.trim())
+              : [];
+          } catch (e) {
+            // If JSON parsing fails, treat as comma-separated string
+            updateData.tags = tags
+              .replace(/[\[\]"]/g, "")
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter((tag) => tag);
+          }
+        } else {
+          // Regular comma-separated string
+          updateData.tags = tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag);
+        }
+      } else if (Array.isArray(tags)) {
+        // If tags is already an array, clean it up
+        updateData.tags = tags
+          .map((tag) => {
+            // Handle case where array contains stringified arrays
+            if (
+              typeof tag === "string" &&
+              tag.startsWith("[") &&
+              tag.endsWith("]")
+            ) {
+              try {
+                const parsed = JSON.parse(tag);
+                return Array.isArray(parsed) ? parsed.join(", ") : tag;
+              } catch (e) {
+                return tag.replace(/[\[\]"]/g, "");
+              }
+            }
+            return tag;
+          })
+          .join(",")
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag);
+      }
     }
+
+    // Remove images from updateData if it's empty (don't update images via this route)
+    if (updateData.images && updateData.images.length === 0) {
+      delete updateData.images;
+    }
+
+    console.log("Processed update data:", updateData); // Debug log
 
     const item = await Gallery.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -147,12 +213,14 @@ exports.updateGalleryItem = async (req, res) => {
     res.json({
       success: true,
       data: item,
+      message: "Gallery item updated successfully",
     });
   } catch (err) {
-    console.error(err);
+    console.error("Update gallery item error:", err);
     res.status(500).json({
       success: false,
       message: "Error updating gallery item",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
     });
   }
 };
@@ -169,26 +237,42 @@ exports.deleteGalleryItem = async (req, res) => {
       });
     }
 
-    // Delete images from Cloudinary
-    const publicIds = item.images.map((img) => img.public_id);
-    await cloudinary.api.delete_resources(publicIds);
+    // Delete images from Cloudinary (with error handling)
+    if (item.images && item.images.length > 0) {
+      try {
+        const publicIds = item.images
+          .map((img) => img.public_id)
+          .filter((id) => id); // Filter out any undefined/null ids
+        if (publicIds.length > 0) {
+          await cloudinary.api.delete_resources(publicIds);
+        }
+      } catch (cloudinaryError) {
+        console.error(
+          "Error deleting images from Cloudinary:",
+          cloudinaryError
+        );
+        // Continue with database deletion even if Cloudinary fails
+      }
+    }
 
-    // Delete from database
-    await item.remove();
+    // Delete from database - use deleteOne() instead of remove()
+    await Gallery.findByIdAndDelete(req.params.id);
+    // Alternative: await item.deleteOne();
 
     res.json({
       success: true,
+      message: "Gallery item deleted successfully",
       data: {},
     });
   } catch (err) {
-    console.error(err);
+    console.error("Delete gallery item error:", err);
     res.status(500).json({
       success: false,
       message: "Error deleting gallery item",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
     });
   }
 };
-
 // Like a gallery item
 exports.likeGalleryItem = async (req, res) => {
   try {
