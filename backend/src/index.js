@@ -45,35 +45,27 @@ app.use((req, res) => {
 });
 
 // Initialize database connection
-let isConnected = false;
-
-const connectToDatabase = async () => {
-  if (isConnected) {
-    return;
-  }
-
+const startServer = async () => {
   try {
+    // Connect to database first
     await DbConnection();
-    isConnected = true;
-    console.log("Connected to MongoDB");
+    console.log("Database connected successfully!");
+
+    // Only start server in development
+    if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+      const PORT = process.env.PORT || 3000;
+      app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+      });
+    }
   } catch (error) {
-    console.error("Failed to connect to database:", error);
-    throw error;
+    console.error("Failed to start server:", error);
+    process.exit(1);
   }
 };
 
-// Middleware to ensure database connection
-app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Database connection failed",
-    });
-  }
-});
+// Start the server
+startServer();
 
 // Export the Express app for Vercel
 module.exports = app;
