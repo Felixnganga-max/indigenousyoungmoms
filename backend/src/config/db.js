@@ -5,11 +5,7 @@ const DbConnection = async () => {
   try {
     await mongoose.connect(
       process.env.MONGODB_URI ||
-        "mongodb+srv://standardwebtechnologies:PSmoZoH1Os9XoQpa@cluster0.7qd3fuf.mongodb.net/IYM",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
+        "mongodb+srv://standardwebtechnologies:PSmoZoH1Os9XoQpa@cluster0.7qd3fuf.mongodb.net/IYM"
     );
     console.log("MongoDB connected successfully!");
   } catch (err) {
