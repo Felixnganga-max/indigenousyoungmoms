@@ -5,6 +5,7 @@ const DbConnection = require("./config/db");
 
 const authRoutes = require("./routes/User");
 const galleryRoutes = require("./routes/Gallery");
+const programRoutes = require("./routes/Programs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/programs", programRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {
