@@ -5,6 +5,9 @@ const DbConnection = require("./config/db");
 const authRoutes = require("./routes/User");
 const galleryRoutes = require("./routes/Gallery");
 const programRoutes = require("./routes/Programs");
+const projectRoutes = require("./routes/Projects");
+const contentRoutes = require("./routes/Content");
+const eventsRoute = require("./routes/Events");
 
 const app = express();
 
@@ -21,6 +24,9 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/programs", programRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/content", contentRoutes);
+app.use("/api/events", eventsRoute);
 
 // Health check route
 app.get("/api/health", (req, res) => {

@@ -18,7 +18,6 @@ const programSchema = new mongoose.Schema(
     // Program Type
     programType: {
       type: String,
-      enum: ["language", "agroecology", "economic"],
       required: true,
     },
 
