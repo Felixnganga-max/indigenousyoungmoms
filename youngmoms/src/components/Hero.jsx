@@ -77,8 +77,8 @@ const Hero = () => {
         </div>
 
         {/* Reduced Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-purple-900/25 to-black/30 z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/15 z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/2 via-purple-500/1 to-black/1 z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/1 via-transparent to-black/1 z-[1]" />
 
         {/* Image Navigation - Improved positioning */}
         <div className="hidden lg:flex absolute top-1/2 left-6 transform -translate-y-1/2 z-20">
