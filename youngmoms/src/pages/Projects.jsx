@@ -46,7 +46,7 @@ const Projects = () => {
   const [notification, setNotification] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const API_BASE = "http://localhost:3000/api/programs";
+  const API_BASE = "https://indigenousyoungmoms-bvv4.vercel.app/api/programs";
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);

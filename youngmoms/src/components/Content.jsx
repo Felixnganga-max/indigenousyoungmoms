@@ -48,7 +48,9 @@ const Content = () => {
   const fetchContent = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/content/");
+      const response = await fetch(
+        "https://indigenousyoungmoms-bvv4.vercel.app/api/content/"
+      );
       const data = await response.json();
       if (data.success) {
         setContents(data.data);
@@ -64,7 +66,7 @@ const Content = () => {
   const fetchDashboardStats = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/content/stats/dashboard"
+        "https://indigenousyoungmoms-bvv4.vercel.app/api/content/stats/dashboard"
       );
       const data = await response.json();
       if (data.success) {
@@ -79,7 +81,7 @@ const Content = () => {
   const fetchAllTags = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/content/tags/all"
+        "https://indigenousyoungmoms-bvv4.vercel.app/api/content/tags/all"
       );
       const data = await response.json();
       if (data.success) {
@@ -216,10 +218,13 @@ const Content = () => {
         formDataToSend.append("images", file);
       });
 
-      const response = await fetch("http://localhost:3000/api/content/create", {
-        method: "POST",
-        body: formDataToSend,
-      });
+      const response = await fetch(
+        "https://indigenousyoungmoms-bvv4.vercel.app/api/content/create",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
 
       const data = await response.json();
 
@@ -271,7 +276,7 @@ const Content = () => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/content/${editingContent._id}`,
+        `https://indigenousyoungmoms-bvv4.vercel.app/api/content/${editingContent._id}`,
         {
           method: "PUT",
           body: formDataToSend,
@@ -303,7 +308,7 @@ const Content = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/content/${contentId}`,
+        `https://indigenousyoungmoms-bvv4.vercel.app/api/content/${contentId}`,
         {
           method: "DELETE",
         }
@@ -333,7 +338,7 @@ const Content = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3000/api/content/search/${encodeURIComponent(
+        `https://indigenousyoungmoms-bvv4.vercel.app/api/content/search/${encodeURIComponent(
           searchQuery
         )}`
       );

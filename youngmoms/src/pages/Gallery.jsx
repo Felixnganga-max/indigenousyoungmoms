@@ -43,7 +43,7 @@ const Gallery = () => {
     const fetchGalleryData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("http://localhost:3000/api/gallery/view");
+        const response = await fetch("https://indigenousyoungmoms-bvv4.vercel.app/api/gallery/view");
         if (!response.ok) {
           throw new Error("Failed to fetch gallery data");
         }
@@ -154,7 +154,7 @@ const Gallery = () => {
 
       // Make API call to update likes on server
       const response = await fetch(
-        `http://localhost:3000/api/gallery/${photoId}/like`,
+        `https://indigenousyoungmoms-bvv4.vercel.app/api/gallery/${photoId}/like`,
         {
           method: "POST",
           headers: {

@@ -18,7 +18,7 @@ import {
   Music,
 } from "lucide-react";
 
-const API_BASE_URL = "http://localhost:3000/api/projects";
+const API_BASE_URL = "https://indigenousyoungmoms-bvv4.vercel.app/api/projects";
 
 const iconOptions = [
   { value: "TreePine", icon: TreePine, label: "Tree Pine" },
