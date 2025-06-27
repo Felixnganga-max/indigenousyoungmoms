@@ -15,9 +15,10 @@ import {
 } from "lucide-react";
 import Gallery from "../components/Gallery";
 import Events from "../components/Events";
-import Mission from "../components/Mission";
+// import Mission from "../components/Mission";
 import Programs from "../components/Programs";
 import Content from "../components/Content";
+import Projects from "../components/Projects";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -83,7 +84,8 @@ const Dashboard = () => {
     { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "Gallery", label: "Gallery", icon: Image },
     { id: "Events", label: "Events", icon: Calendar },
-    { id: "Mission", label: "Mission & Events", icon: Target },
+    { id: "Projects", label: "Projects", icon: Calendar },
+    // { id: "Mission", label: "Mission & Events", icon: Target },
     { id: "Programs", label: "Programs", icon: Users },
     { id: "Content", label: "Content/Blogs", icon: FileText },
   ];
@@ -125,9 +127,11 @@ const Dashboard = () => {
       case "Events":
         return <Events />;
       case "Mission":
-        return <Mission />;
+      // return <Mission />;
       case "Programs":
         return <Programs />;
+      case "Projects":
+        return <Projects />;
       case "Content":
         return <Content />;
       default:
@@ -156,7 +160,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-sky-100 to-blue-100">
+    <div className="flex h-screen">
       {/* Mobile Overlay */}
       {isMobile && isSidebarOpen && (
         <div

@@ -33,287 +33,218 @@ const Gallery = () => {
   const [filteredPhotos, setFilteredPhotos] = useState([]);
   const [relatedPhotos, setRelatedPhotos] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [galleryData, setGalleryData] = useState([]);
 
-  // Sample gallery data with categories - replace with database data later
-  const galleryData = [
-    {
-      id: 1,
-      title: "Community Wellness Workshop",
-      category: "workshops",
-      event: "Mental Health Awareness Week",
-      date: "2024-03-15",
-      location: "Community Center",
-      photographer: "Sarah Johnson",
-      description: "Indigenous mothers participating in wellness activities",
-      imageUrl:
-        "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&q=80",
-      likes: 24,
-      views: 156,
-      tags: ["wellness", "community", "mental-health", "mothers"],
-    },
-    {
-      id: 2,
-      title: "Traditional Cooking Class",
-      category: "cultural",
-      event: "Cultural Heritage Month",
-      date: "2024-02-28",
-      location: "Cultural Center",
-      photographer: "Maria Santos",
-      description:
-        "Learning traditional recipes passed down through generations",
-      imageUrl:
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
-      likes: 45,
-      views: 289,
-      tags: ["cooking", "tradition", "culture", "heritage"],
-    },
-    {
-      id: 3,
-      title: "Children's Play Day",
-      category: "family",
-      event: "Family Fun Weekend",
-      date: "2024-04-10",
-      location: "City Park",
-      photographer: "Jennifer Wilson",
-      description: "Young mothers and children enjoying outdoor activities",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&q=80",
-      likes: 67,
-      views: 342,
-      tags: ["children", "play", "outdoor", "family"],
-    },
-    {
-      id: 4,
-      title: "Educational Workshop",
-      category: "education",
-      event: "Learning Together Series",
-      date: "2024-01-20",
-      location: "Library",
-      photographer: "Amanda Lee",
-      description: "Young mothers attending parenting and education workshop",
-      imageUrl:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-      likes: 33,
-      views: 198,
-      tags: ["education", "learning", "parenting", "workshop"],
-    },
-    {
-      id: 5,
-      title: "Graduation Ceremony",
-      category: "achievements",
-      event: "Program Completion",
-      date: "2024-05-15",
-      location: "Conference Hall",
-      photographer: "Robert Kim",
-      description: "Celebrating mothers who completed educational programs",
-      imageUrl:
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9d1?w=800&q=80",
-      likes: 89,
-      views: 456,
-      tags: ["graduation", "achievement", "celebration", "education"],
-    },
-    {
-      id: 6,
-      title: "Art Therapy Session",
-      category: "workshops",
-      event: "Creative Healing Program",
-      date: "2024-03-08",
-      location: "Art Studio",
-      photographer: "Lisa Chen",
-      description: "Mothers expressing themselves through art and creativity",
-      imageUrl:
-        "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80",
-      likes: 52,
-      views: 267,
-      tags: ["art", "therapy", "creativity", "healing"],
-    },
-    {
-      id: 7,
-      title: "Community Garden Project",
-      category: "community",
-      event: "Green Initiative",
-      date: "2024-04-22",
-      location: "Community Garden",
-      photographer: "David Martinez",
-      description: "Families working together to maintain community garden",
-      imageUrl:
-        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80",
-      likes: 41,
-      views: 234,
-      tags: ["garden", "environment", "community", "sustainability"],
-    },
-    {
-      id: 8,
-      title: "Baby & Me Yoga",
-      category: "family",
-      event: "Wellness for Moms",
-      date: "2024-02-14",
-      location: "Wellness Center",
-      photographer: "Rachel Green",
-      description: "New mothers practicing yoga with their babies",
-      imageUrl:
-        "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
-      likes: 78,
-      views: 401,
-      tags: ["yoga", "baby", "wellness", "bonding"],
-    },
-    {
-      id: 9,
-      title: "Storytelling Circle",
-      category: "cultural",
-      event: "Traditional Stories Night",
-      date: "2024-03-30",
-      location: "Elder's Hall",
-      photographer: "Michael Brown",
-      description: "Elders sharing traditional stories with young mothers",
-      imageUrl:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
-      likes: 36,
-      views: 187,
-      tags: ["storytelling", "tradition", "elders", "culture"],
-    },
-    {
-      id: 10,
-      title: "Leadership Workshop",
-      category: "education",
-      event: "Empowerment Series",
-      date: "2024-01-25",
-      location: "Conference Room",
-      photographer: "Patricia Davis",
-      description: "Young mothers developing leadership skills",
-      imageUrl:
-        "https://images.unsplash.com/photo-1515169067868-5387ec356754?w=800&q=80",
-      likes: 94,
-      views: 512,
-      tags: ["leadership", "empowerment", "skills", "development"],
-    },
-    {
-      id: 11,
-      title: "Cultural Dance Performance",
-      category: "cultural",
-      event: "Heritage Festival",
-      date: "2024-06-01",
-      location: "Festival Grounds",
-      photographer: "Carlos Rodriguez",
-      description: "Traditional dance performance by community members",
-      imageUrl:
-        "https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?w=800&q=80",
-      likes: 156,
-      views: 723,
-      tags: ["dance", "performance", "culture", "festival"],
-    },
-    {
-      id: 12,
-      title: "Support Group Meeting",
-      category: "support",
-      event: "Weekly Support Circle",
-      date: "2024-04-03",
-      location: "Community Room",
-      photographer: "Helen White",
-      description: "Mothers sharing experiences and supporting each other",
-      imageUrl:
-        "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&q=80",
-      likes: 29,
-      views: 145,
-      tags: ["support", "community", "sharing", "circle"],
-    },
-  ];
+  // Fetch gallery data from API
+  useEffect(() => {
+    const fetchGalleryData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("http://localhost:3000/api/gallery/view");
+        if (!response.ok) {
+          throw new Error("Failed to fetch gallery data");
+        }
+        const result = await response.json();
 
-  // Categories for filtering with creative positioning
-  const categories = [
-    {
-      id: "all",
-      label: "All Photos",
-      icon: ImageIcon,
-      count: galleryData.length,
-      color: "from-purple-500 to-pink-500",
-      position: { top: "5%", left: "10%" },
-      size: "large",
-    },
-    {
-      id: "workshops",
-      label: "Workshops",
-      icon: GraduationCap,
-      count: galleryData.filter((p) => p.category === "workshops").length,
-      color: "from-blue-500 to-cyan-500",
-      position: { top: "25%", left: "5%" },
-      size: "medium",
-    },
-    {
-      id: "cultural",
-      label: "Cultural Events",
-      icon: Star,
-      count: galleryData.filter((p) => p.category === "cultural").length,
-      color: "from-amber-500 to-orange-500",
-      position: { top: "15%", left: "25%" },
-      size: "small",
-    },
-    {
-      id: "family",
-      label: "Family & Kids",
-      icon: Baby,
-      count: galleryData.filter((p) => p.category === "family").length,
-      color: "from-pink-500 to-rose-500",
-      position: { top: "45%", left: "8%" },
-      size: "medium",
-    },
-    {
-      id: "education",
-      label: "Education",
-      icon: GraduationCap,
-      count: galleryData.filter((p) => p.category === "education").length,
-      color: "from-emerald-500 to-teal-500",
-      position: { top: "35%", left: "22%" },
-      size: "large",
-    },
-    {
-      id: "achievements",
-      label: "Achievements",
-      icon: Award,
-      count: galleryData.filter((p) => p.category === "achievements").length,
-      color: "from-yellow-500 to-amber-500",
-      position: { top: "65%", left: "12%" },
-      size: "small",
-    },
-    {
-      id: "community",
-      label: "Community",
-      icon: Users,
-      count: galleryData.filter((p) => p.category === "community").length,
-      color: "from-green-500 to-emerald-500",
-      position: { top: "55%", left: "25%" },
-      size: "medium",
-    },
-    {
-      id: "support",
-      label: "Support Groups",
-      icon: Heart,
-      count: galleryData.filter((p) => p.category === "support").length,
-      color: "from-red-500 to-pink-500",
-      position: { top: "75%", left: "8%" },
-      size: "small",
-    },
-  ];
+        // Transform the API data to match the component's expected structure
+        const transformedData = result.data.map((item) => ({
+          id: item._id,
+          title: item.title || "Untitled",
+          description: item.description || "",
+          category: item.category || "general",
+          event: item.event || "",
+          location: item.location || "Unknown Location",
+          photographer: item.photographer || "Unknown",
+          // Use the first image from the images array
+          imageUrl:
+            item.images && item.images.length > 0
+              ? item.images[0].url
+              : "/placeholder-image.jpg",
+          tags: item.tags || [],
+          likes: item.likes || 0,
+          views: item.views || 0,
+          date: item.createdAt || new Date().toISOString(),
+        }));
+
+        setGalleryData(transformedData);
+
+        // Generate categories from the transformed data
+        const uniqueCategories = [
+          ...new Set(transformedData.map((item) => item.category)),
+        ];
+
+        const categoryCounts = uniqueCategories.map((cat) => ({
+          id: cat.toLowerCase().replace(/\s+/g, "-"),
+          label: cat.charAt(0).toUpperCase() + cat.slice(1),
+          count: transformedData.filter((item) => item.category === cat).length,
+        }));
+
+        // Create categories with icons based on category type
+        const getCategoryIcon = (category) => {
+          switch (category.toLowerCase()) {
+            case "family":
+              return Baby;
+            case "workshops":
+              return GraduationCap;
+            case "cultural":
+              return Star;
+            case "education":
+              return GraduationCap;
+            case "achievements":
+              return Award;
+            case "community":
+              return Users;
+            case "support":
+              return Heart;
+            default:
+              return ImageIcon;
+          }
+        };
+
+        // Add "All" category and others
+        setCategories([
+          {
+            id: "all",
+            label: "All Photos",
+            icon: ImageIcon,
+            count: transformedData.length,
+            color: "from-purple-500 to-pink-500",
+            position: { top: "5%", left: "10%" },
+            size: "large",
+          },
+          ...categoryCounts.map((cat, index) => ({
+            ...cat,
+            icon: getCategoryIcon(cat.id),
+            color: getRandomGradient(),
+            position: getRandomPosition(),
+            size: getRandomSize(),
+          })),
+        ]);
+      } catch (err) {
+        console.error("Error fetching gallery data:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGalleryData();
+  }, []);
+
+  // Like functionality
+  const handleLike = async (photoId, e) => {
+    e.stopPropagation(); // Prevent opening the modal when clicking like
+    try {
+      // Optimistically update the UI
+      setGalleryData((prevData) =>
+        prevData.map((photo) =>
+          photo.id === photoId ? { ...photo, likes: photo.likes + 1 } : photo
+        )
+      );
+
+      // Update filtered photos if needed
+      setFilteredPhotos((prevFiltered) =>
+        prevFiltered.map((photo) =>
+          photo.id === photoId ? { ...photo, likes: photo.likes + 1 } : photo
+        )
+      );
+
+      // Make API call to update likes on server
+      const response = await fetch(
+        `http://localhost:3000/api/gallery/${photoId}/like`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        // If API call fails, revert the optimistic update
+        setGalleryData((prevData) =>
+          prevData.map((photo) =>
+            photo.id === photoId ? { ...photo, likes: photo.likes - 1 } : photo
+          )
+        );
+        setFilteredPhotos((prevFiltered) =>
+          prevFiltered.map((photo) =>
+            photo.id === photoId ? { ...photo, likes: photo.likes - 1 } : photo
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error liking photo:", error);
+      // Revert optimistic update on error
+      setGalleryData((prevData) =>
+        prevData.map((photo) =>
+          photo.id === photoId ? { ...photo, likes: photo.likes - 1 } : photo
+        )
+      );
+      setFilteredPhotos((prevFiltered) =>
+        prevFiltered.map((photo) =>
+          photo.id === photoId ? { ...photo, likes: photo.likes - 1 } : photo
+        )
+      );
+    }
+  };
+
+  // Helper functions for categories
+  const getRandomGradient = () => {
+    const gradients = [
+      "from-blue-500 to-cyan-500",
+      "from-amber-500 to-orange-500",
+      "from-pink-500 to-rose-500",
+      "from-emerald-500 to-teal-500",
+      "from-yellow-500 to-amber-500",
+      "from-green-500 to-emerald-500",
+      "from-red-500 to-pink-500",
+    ];
+    return gradients[Math.floor(Math.random() * gradients.length)];
+  };
+
+  const getRandomPosition = () => {
+    return {
+      top: `${Math.floor(Math.random() * 70) + 5}%`,
+      left: `${Math.floor(Math.random() * 30) + 5}%`,
+    };
+  };
+
+  const getRandomSize = () => {
+    const sizes = ["small", "medium", "large"];
+    return sizes[Math.floor(Math.random() * sizes.length)];
+  };
 
   // Filter photos based on category and search
   useEffect(() => {
+    if (!galleryData.length) return;
+
     let filtered = galleryData;
 
     if (selectedCategory !== "all") {
       filtered = filtered.filter(
-        (photo) => photo.category === selectedCategory
+        (photo) => photo.category.toLowerCase() === selectedCategory
       );
     }
 
     if (searchTerm) {
       filtered = filtered.filter(
         (photo) =>
-          photo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          photo.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          photo.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase())
-          ) ||
-          photo.event.toLowerCase().includes(searchTerm.toLowerCase())
+          (photo.title &&
+            photo.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (photo.description &&
+            photo.description
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())) ||
+          (photo.tags &&
+            photo.tags.some((tag) =>
+              tag.toLowerCase().includes(searchTerm.toLowerCase())
+            )) ||
+          (photo.event &&
+            photo.event.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -322,15 +253,18 @@ const Gallery = () => {
     // Generate related photos
     if (selectedCategory !== "all") {
       const currentCategoryPhotos = galleryData.filter(
-        (p) => p.category === selectedCategory
+        (p) => p.category.toLowerCase() === selectedCategory
       );
       const otherPhotos = galleryData.filter(
-        (p) => p.category !== selectedCategory
+        (p) => p.category.toLowerCase() !== selectedCategory
       );
       const related = otherPhotos
         .filter((photo) =>
-          currentCategoryPhotos.some((cp) =>
-            cp.tags.some((tag) => photo.tags.includes(tag))
+          currentCategoryPhotos.some(
+            (cp) =>
+              cp.tags &&
+              photo.tags &&
+              cp.tags.some((tag) => photo.tags.includes(tag))
           )
         )
         .slice(0, 4);
@@ -338,7 +272,7 @@ const Gallery = () => {
     } else {
       setRelatedPhotos([]);
     }
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, galleryData]);
 
   const handleCategoryClick = (categoryId) => {
     setIsAnimating(true);
@@ -375,6 +309,9 @@ const Gallery = () => {
                 src={image.imageUrl}
                 alt={image.title}
                 className="w-full h-64 lg:h-[600px] object-cover"
+                onError={(e) => {
+                  e.target.src = "/placeholder-image.jpg";
+                }}
               />
               <div className="absolute top-4 right-4">
                 <button
@@ -393,7 +330,7 @@ const Gallery = () => {
                   {image.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  {image.description}
+                  {image.description || "No description available."}
                 </p>
               </div>
 
@@ -427,32 +364,75 @@ const Gallery = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {image.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 text-sm font-medium rounded-full border border-emerald-200"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-
-              <div className="pt-6 border-t border-gray-200">
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4">
-                  <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Event Details
-                  </p>
-                  <p className="text-emerald-600 font-medium">{image.event}</p>
+              {image.tags && image.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {image.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1.5 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 text-sm font-medium rounded-full border border-emerald-200"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
                 </div>
-              </div>
+              )}
+
+              {image.event && (
+                <div className="pt-6 border-t border-gray-200">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4">
+                    <p className="text-sm font-bold text-emerald-700 mb-2 flex items-center">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Event Details
+                    </p>
+                    <p className="text-emerald-600 font-medium">
+                      {image.event}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
     );
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-300 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600 font-medium">
+            Loading community memories...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <X className="w-8 h-8 text-red-500" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">
+            Unable to Load Gallery
+          </h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 font-semibold"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -568,16 +548,27 @@ const Gallery = () => {
                     src={photo.imageUrl}
                     alt={photo.title}
                     className="w-full h-64 object-cover"
+                    onError={(e) => {
+                      e.target.src = "/placeholder-image.jpg";
+                    }}
                   />
 
                   {/* Category Badge */}
                   <div className="absolute top-3 left-3">
                     <span
                       className={`px-3 py-1 bg-gradient-to-r ${
-                        categories.find((c) => c.id === photo.category)?.color
+                        categories.find(
+                          (c) =>
+                            c.id ===
+                            photo.category.toLowerCase().replace(/\s+/g, "-")
+                        )?.color || "from-gray-500 to-gray-600"
                       } text-white text-xs font-bold rounded-full backdrop-blur-sm shadow-lg`}
                     >
-                      {categories.find((c) => c.id === photo.category)?.label}
+                      {categories.find(
+                        (c) =>
+                          c.id ===
+                          photo.category.toLowerCase().replace(/\s+/g, "-")
+                      )?.label || photo.category}
                     </span>
                   </div>
 
@@ -598,10 +589,13 @@ const Gallery = () => {
 
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
+                      <button
+                        onClick={(e) => handleLike(photo.id, e)}
+                        className="flex items-center space-x-1 hover:text-red-500 transition-colors duration-200"
+                      >
                         <Heart className="w-4 h-4 text-red-500" />
                         <span className="font-semibold">{photo.likes}</span>
-                      </div>
+                      </button>
                       <div className="flex items-center space-x-1">
                         <Eye className="w-4 h-4 text-blue-500" />
                         <span className="font-semibold">{photo.views}</span>
@@ -730,7 +724,7 @@ const Gallery = () => {
                 <div className="text-2xl font-bold text-pink-600">
                   {galleryData.reduce((sum, p) => sum + p.likes, 0)}
                 </div>
-                <div className="text-sm text-gray-600">Total Likes/</div>
+                <div className="text-sm text-gray-600">Total Likes</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
@@ -749,8 +743,8 @@ const Gallery = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 p-8">
-          {/* Header with Results Count */}
+        <div className="flex-1 bg-white/40 backdrop-blur-sm p-8 overflow-y-auto">
+          {/* Content Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -761,19 +755,15 @@ const Gallery = () => {
                 </h2>
                 <p className="text-gray-600">
                   Showing{" "}
-                  <span className="font-bold text-indigo-600">
+                  <span className="font-semibold text-indigo-600">
                     {filteredPhotos.length}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-bold text-gray-800">
-                    {galleryData.length}
                   </span>{" "}
                   photos
                   {searchTerm && (
                     <span>
                       {" "}
                       matching "
-                      <span className="font-bold text-pink-600">
+                      <span className="font-semibold text-pink-600">
                         {searchTerm}
                       </span>
                       "
@@ -783,191 +773,178 @@ const Gallery = () => {
               </div>
 
               {/* View Mode Toggle */}
-              <div className="flex bg-white rounded-xl shadow-lg p-1">
+              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg">
                 <button
                   onClick={() => setViewMode("masonry")}
-                  className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                  className={`p-3 rounded-lg transition-all duration-300 ${
                     viewMode === "masonry"
                       ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <Grid className="w-4 h-4" />
-                  <span className="font-medium">Masonry</span>
+                  <Grid className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setViewMode("grid")}
-                  className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
-                    viewMode === "grid"
+                  onClick={() => setViewMode("list")}
+                  className={`p-3 rounded-lg transition-all duration-300 ${
+                    viewMode === "list"
                       ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <Filter className="w-4 h-4" />
-                  <span className="font-medium">Grid</span>
+                  <Filter className="w-5 h-5" />
                 </button>
               </div>
             </div>
-
-            {/* Active Filters */}
-            {(selectedCategory !== "all" || searchTerm) && (
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <span className="text-sm font-medium text-gray-600">
-                  Active filters:
-                </span>
-                {selectedCategory !== "all" && (
-                  <span className="px-3 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-sm font-medium rounded-full border border-indigo-200 flex items-center space-x-2">
-                    <Tag className="w-3 h-3" />
-                    <span>
-                      {categories.find((c) => c.id === selectedCategory)?.label}
-                    </span>
-                    <button
-                      onClick={() => setSelectedCategory("all")}
-                      className="ml-1 hover:bg-indigo-200 rounded-full p-0.5"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                )}
-                {searchTerm && (
-                  <span className="px-3 py-1 bg-gradient-to-r from-pink-100 to-rose-100 text-pink-700 text-sm font-medium rounded-full border border-pink-200 flex items-center space-x-2">
-                    <Search className="w-3 h-3" />
-                    <span>"{searchTerm}"</span>
-                    <button
-                      onClick={() => setSearchTerm("")}
-                      className="ml-1 hover:bg-pink-200 rounded-full p-0.5"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                )}
-                <button
-                  onClick={() => {
-                    setSelectedCategory("all");
-                    setSearchTerm("");
-                  }}
-                  className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 underline"
-                >
-                  Clear all
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Photo Gallery */}
+          {/* Photo Grid */}
           {filteredPhotos.length > 0 ? (
             <div
-              className={`${
+              className={`grid gap-6 ${
                 viewMode === "masonry"
-                  ? "columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
-                  : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  : "grid-cols-1 lg:grid-cols-2"
               } ${
-                isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                isAnimating ? "opacity-50 scale-95" : "opacity-100 scale-100"
               } transition-all duration-300`}
             >
               {filteredPhotos.map((photo, index) => (
                 <div
                   key={photo.id}
-                  className={`${
-                    viewMode === "masonry" ? "break-inside-avoid mb-6" : ""
-                  } group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:-rotate-1`}
+                  className={`group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-105 hover:-rotate-1 ${
+                    viewMode === "list" ? "flex" : ""
+                  }`}
                   onClick={() => setSelectedImage(photo)}
                   style={{
                     animationDelay: `${index * 100}ms`,
+                    animation: "fadeInUp 0.6s ease-out forwards",
                   }}
                 >
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:shadow-indigo-200/50">
-                    {/* Image */}
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={photo.imageUrl}
-                        alt={photo.title}
-                        className="w-full h-48 md:h-56 lg:h-64 object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
+                  <div
+                    className={`relative ${
+                      viewMode === "list" ? "w-1/3 flex-shrink-0" : ""
+                    }`}
+                  >
+                    <img
+                      src={photo.imageUrl}
+                      alt={photo.title}
+                      className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+                        viewMode === "list" ? "h-48" : "h-64"
+                      }`}
+                      onError={(e) => {
+                        e.target.src = "/placeholder-image.jpg";
+                      }}
+                    />
 
-                      {/* Overlay on Hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute bottom-4 left-4 text-white">
+                    {/* Overlay on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="flex items-center justify-between text-white">
                           <div className="flex items-center space-x-3">
-                            <div className="flex items-center space-x-1">
+                            <button
+                              onClick={(e) => handleLike(photo.id, e)}
+                              className="flex items-center space-x-1 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 hover:bg-white/30 transition-all duration-200"
+                            >
                               <Heart className="w-4 h-4 text-red-400" />
-                              <span className="font-semibold">
+                              <span className="text-sm font-semibold">
                                 {photo.likes}
                               </span>
-                            </div>
-                            <div className="flex items-center space-x-1">
+                            </button>
+                            <div className="flex items-center space-x-1 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                               <Eye className="w-4 h-4 text-blue-400" />
-                              <span className="font-semibold">
+                              <span className="text-sm font-semibold">
                                 {photo.views}
                               </span>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="absolute top-4 right-4">
-                          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200">
-                            <Eye className="w-5 h-5 text-white" />
+                          <div className="bg-white/20 backdrop-blur-sm rounded-full p-2">
+                            <Eye className="w-4 h-4" />
                           </div>
                         </div>
                       </div>
-
-                      {/* Category Badge */}
-                      <div className="absolute top-4 left-4">
-                        <span
-                          className={`px-3 py-1 bg-gradient-to-r ${
-                            categories.find((c) => c.id === photo.category)
-                              ?.color
-                          } text-white text-xs font-bold rounded-full backdrop-blur-sm shadow-lg`}
-                        >
-                          {
-                            categories.find((c) => c.id === photo.category)
-                              ?.label
-                          }
-                        </span>
-                      </div>
                     </div>
 
-                    {/* Photo Info */}
-                    <div className="p-5">
-                      <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-200">
+                    {/* Category Badge */}
+                    <div className="absolute top-3 left-3">
+                      <span
+                        className={`px-3 py-1 bg-gradient-to-r ${
+                          categories.find(
+                            (c) =>
+                              c.id ===
+                              photo.category.toLowerCase().replace(/\s+/g, "-")
+                          )?.color || "from-gray-500 to-gray-600"
+                        } text-white text-xs font-bold rounded-full backdrop-blur-sm shadow-lg`}
+                      >
+                        {categories.find(
+                          (c) =>
+                            c.id ===
+                            photo.category.toLowerCase().replace(/\s+/g, "-")
+                        )?.label || photo.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Photo Details */}
+                  <div
+                    className={`p-6 ${
+                      viewMode === "list"
+                        ? "flex-1 flex flex-col justify-between"
+                        : ""
+                    }`}
+                  >
+                    <div>
+                      <h3 className="font-bold text-xl text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-300">
                         {photo.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {photo.description}
-                      </p>
+                      {photo.description && (
+                        <p className="text-gray-600 mb-3 leading-relaxed">
+                          {photo.description}
+                        </p>
+                      )}
+                      {photo.event && (
+                        <p className="text-sm font-medium text-emerald-600 mb-3 bg-emerald-50 rounded-lg px-3 py-2">
+                          📅 {photo.event}
+                        </p>
+                      )}
+                    </div>
 
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{photo.location}</span>
+                        </div>
                         <div className="flex items-center space-x-1">
                           <Calendar className="w-4 h-4" />
                           <span>
                             {new Date(photo.date).toLocaleDateString()}
                           </span>
                         </div>
+                      </div>
 
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="w-4 h-4" />
-                          <span className="truncate max-w-20">
-                            {photo.location}
-                          </span>
+                      <div className="flex items-center space-x-1 text-sm text-gray-500">
+                        <Camera className="w-4 h-4" />
+                        <span>{photo.photographer}</span>
+                      </div>
+
+                      {photo.tags && photo.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {photo.tags.slice(0, 3).map((tag, tagIndex) => (
+                            <span
+                              key={tagIndex}
+                              className="px-2 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-xs font-medium rounded-full"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                          {photo.tags.length > 3 && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                              +{photo.tags.length - 3} more
+                            </span>
+                          )}
                         </div>
-                      </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {photo.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <span
-                            key={tagIndex}
-                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-200"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                        {photo.tags.length > 3 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
-                            +{photo.tags.length - 3}
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -984,33 +961,21 @@ const Gallery = () => {
               </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
                 {searchTerm
-                  ? `We couldn't find any photos matching "${searchTerm}". Try adjusting your search or browse different categories.`
-                  : "No photos available in this category yet. Check back soon for new memories!"}
+                  ? `No photos match your search for "${searchTerm}". Try adjusting your search terms.`
+                  : "No photos available in this category. Check back later for new memories!"}
               </p>
-              <div className="space-x-4">
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSelectedCategory("all");
-                  }}
-                  className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg"
-                >
-                  View All Photos
-                </button>
-                <button
-                  onClick={() => {
-                    const randomCategory =
-                      categories[
-                        Math.floor(Math.random() * (categories.length - 1)) + 1
-                      ];
-                    setSelectedCategory(randomCategory.id);
-                  }}
-                  className="px-8 py-3 bg-white text-gray-700 border-2 border-gray-200 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-all duration-300 font-semibold flex items-center space-x-2"
-                >
-                  <Shuffle className="w-4 h-4" />
-                  <span>Random Category</span>
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("all");
+                }}
+                className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <div className="flex items-center space-x-2">
+                  <Shuffle className="w-5 h-5" />
+                  <span>View All Photos</span>
+                </div>
+              </button>
             </div>
           )}
 
@@ -1018,40 +983,35 @@ const Gallery = () => {
           {relatedPhotos.length > 0 && (
             <div className="mt-16 pt-8 border-t border-gray-200">
               <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <Sparkles className="w-6 h-6 mr-3 text-indigo-600" />
-                You might also like
+                <Sparkles className="w-6 h-6 mr-3 text-pink-500" />
+                Related Memories
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedPhotos.map((photo) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {relatedPhotos.map((photo, index) => (
                   <div
                     key={photo.id}
-                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                    className="group relative bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105"
                     onClick={() => setSelectedImage(photo)}
+                    style={{
+                      animationDelay: `${index * 150}ms`,
+                      animation: "slideInLeft 0.6s ease-out forwards",
+                    }}
                   >
-                    <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
-                      <div className="relative">
-                        <img
-                          src={photo.imageUrl}
-                          alt={photo.title}
-                          className="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="absolute bottom-2 left-2 text-white">
-                            <div className="flex items-center space-x-2 text-xs">
-                              <Heart className="w-3 h-3 text-red-400" />
-                              <span>{photo.likes}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        <h4 className="font-semibold text-sm text-gray-900 truncate group-hover:text-indigo-600 transition-colors duration-200">
-                          {photo.title}
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(photo.date).toLocaleDateString()}
-                        </p>
-                      </div>
+                    <img
+                      src={photo.imageUrl}
+                      alt={photo.title}
+                      className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.src = "/placeholder-image.jpg";
+                      }}
+                    />
+                    <div className="p-4">
+                      <h4 className="font-semibold text-gray-800 mb-1 truncate">
+                        {photo.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 truncate">
+                        {photo.event}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -1062,10 +1022,76 @@ const Gallery = () => {
       </div>
 
       {/* Image Modal */}
-      <ImageModal
-        image={selectedImage}
-        onClose={() => setSelectedImage(null)}
-      />
+      {selectedImage && (
+        <ImageModal
+          image={selectedImage}
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
+        .animate-in {
+          animation-fill-mode: both;
+        }
+
+        .fade-in {
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        .zoom-in {
+          animation: zoomIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes zoomIn {
+          from {
+            transform: scale(0.8);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 };

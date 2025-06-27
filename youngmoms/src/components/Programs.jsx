@@ -18,7 +18,7 @@ const Programs = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("create"); // create, edit, view
+  const [modalMode, setModalMode] = useState("create");
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -132,24 +132,55 @@ const Programs = () => {
   };
 
   const handleSubmit = async () => {
+    // Basic validation
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.programType.trim()
+    ) {
+      showNotification("Please fill in all required fields", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("title", formData.title);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("programType", formData.programType);
-      formDataToSend.append("status", formData.status);
+      let requestBody;
+      let headers = {};
 
-      // Add features
-      formData.features.forEach((feature) => {
-        formDataToSend.append("features", feature);
-      });
+      // If there are files, use FormData
+      if (selectedFiles.length > 0) {
+        const formDataToSend = new FormData();
+        formDataToSend.append("title", formData.title);
+        formDataToSend.append("description", formData.description);
+        formDataToSend.append("programType", formData.programType);
+        formDataToSend.append("status", formData.status);
 
-      // Add files
-      selectedFiles.forEach((file) => {
-        formDataToSend.append("images", file);
-      });
+        // Add features
+        formData.features.forEach((feature) => {
+          formDataToSend.append("features", feature);
+        });
+
+        // Add files
+        selectedFiles.forEach((file) => {
+          formDataToSend.append("images", file);
+        });
+
+        requestBody = formDataToSend;
+        // Don't set Content-Type header, let the browser set it with boundary for FormData
+      } else {
+        // If no files, send JSON
+        requestBody = JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          programType: formData.programType,
+          features: formData.features,
+          status: formData.status,
+        });
+        headers = {
+          "Content-Type": "application/json",
+        };
+      }
 
       // Use different endpoints for create vs edit
       const url =
@@ -158,22 +189,36 @@ const Programs = () => {
           : `${API_BASE}/${selectedProgram._id}`;
       const method = modalMode === "create" ? "POST" : "PUT";
 
-      const response = await fetch(url, {
+      console.log("Request details:", {
+        url,
         method,
-        body: formDataToSend,
+        headers,
+        hasFiles: selectedFiles.length > 0,
+        formData: formData,
       });
 
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: requestBody,
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (data.success) {
         showNotification(data.message);
         fetchPrograms();
         closeModal();
       } else {
-        showNotification(data.message, "error");
+        showNotification(data.message || "Operation failed", "error");
       }
     } catch (error) {
-      showNotification("Operation failed", "error");
+      console.error("Submit error:", error);
+      showNotification("Operation failed: " + error.message, "error");
     } finally {
       setLoading(false);
     }
