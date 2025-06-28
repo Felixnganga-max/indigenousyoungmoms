@@ -37,12 +37,12 @@ const Gallery = () => {
 
   // Form state
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    title: "Community",
+    description: "Amazing",
     category: "family",
-    event: "",
-    location: "",
-    photographer: "",
+    event: "N/A",
+    location: "Lakipia",
+    photographer: "Elphas",
     tags: "",
     images: null,
   });
