@@ -49,13 +49,7 @@ exports.createGalleryItem = async (req, res) => {
 // Get all gallery items with filtering and search
 exports.getGalleryItems = async (req, res) => {
   try {
-    const {
-      category,
-      search,
-      sort = "-createdAt",
-      limit = 12,
-      page = 1,
-    } = req.query;
+    const { category, search, sort = "-createdAt" } = req.query;
 
     // Build query
     let query = {};
@@ -70,19 +64,11 @@ exports.getGalleryItems = async (req, res) => {
       query.$text = { $search: search };
     }
 
-    // Pagination
-    const skip = (page - 1) * limit;
-
-    const [items, total] = await Promise.all([
-      Gallery.find(query).sort(sort).skip(skip).limit(parseInt(limit)),
-      Gallery.countDocuments(query),
-    ]);
+    const items = await Gallery.find(query).sort(sort);
 
     res.json({
       success: true,
       count: items.length,
-      total,
-      pages: Math.ceil(total / limit),
       data: items,
     });
   } catch (err) {
