@@ -92,7 +92,7 @@ const Hero = () => {
         <div className="hidden lg:flex absolute top-1/2 right-8 transform -translate-y-1/2 z-20">
           <button
             onClick={nextImage}
-            className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
+            className="group text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
             aria-label="Next image"
           >
             <ChevronRight className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
@@ -102,7 +102,7 @@ const Hero = () => {
         {/* Main Content Container */}
         <div className="relative z-10 flex items-center min-h-screen">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full py-24">
-            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left bg-black/10 backdrop-blur-xs rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
+            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left bg-black/1 rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
               {/* Professional Badge */}
               <div className="inline-flex items-center space-x-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-8 py-4 mb-12 shadow-lg">
                 <div className="flex items-center space-x-2">
