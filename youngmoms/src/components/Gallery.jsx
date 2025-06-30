@@ -580,7 +580,7 @@ const Gallery = () => {
     e.preventDefault();
     setError(null);
 
-    if (!formData.title || !formData.category || !formData.event) {
+    if (!formData.title || !formData.category) {
       const errorMsg = "Title, Category, and Event are required";
       setError(errorMsg);
       showErrorToast(errorMsg, "⚠️");
@@ -991,7 +991,6 @@ const Gallery = () => {
                         name="event"
                         value={formData.event}
                         onChange={handleInputChange}
-                        required
                         className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
                         placeholder="Event name"
                       />
