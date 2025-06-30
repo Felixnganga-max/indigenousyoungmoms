@@ -31,6 +31,10 @@ import {
   Flower,
   Palette,
   Camera,
+  ChevronLeft,
+  ImageIcon,
+  ZoomIn,
+  Download,
 } from "lucide-react";
 
 const Projects = () => {
@@ -45,6 +49,10 @@ const Projects = () => {
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [imageCarousels, setImageCarousels] = useState({});
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedProgramImages, setSelectedProgramImages] = useState([]);
 
   const API_BASE = "https://indigenousyoungmoms-bvv4.vercel.app/api/programs";
 
@@ -97,6 +105,12 @@ const Projects = () => {
       const data = await response.json();
       if (data.success) {
         setPrograms(data.data);
+        // Initialize carousel state for each program
+        const carouselState = {};
+        data.data.forEach((program) => {
+          carouselState[program._id] = 0;
+        });
+        setImageCarousels(carouselState);
       } else {
         showNotification("Failed to fetch programs", "error");
       }
@@ -121,6 +135,59 @@ const Projects = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedProgram(null);
+  };
+
+  const openImageModal = (images, initialIndex = 0) => {
+    setSelectedProgramImages(images);
+    setSelectedImageIndex(initialIndex);
+    setShowImageModal(true);
+  };
+
+  const closeImageModal = () => {
+    setShowImageModal(false);
+    setSelectedProgramImages([]);
+    setSelectedImageIndex(0);
+  };
+
+  const nextCarouselImage = (programId, e) => {
+    e.stopPropagation();
+    const program = programs.find((p) => p._id === programId);
+    if (program && program.images && program.images.length > 1) {
+      setImageCarousels((prev) => ({
+        ...prev,
+        [programId]: (prev[programId] + 1) % program.images.length,
+      }));
+    }
+  };
+
+  const prevCarouselImage = (programId, e) => {
+    e.stopPropagation();
+    const program = programs.find((p) => p._id === programId);
+    if (program && program.images && program.images.length > 1) {
+      setImageCarousels((prev) => ({
+        ...prev,
+        [programId]:
+          prev[programId] === 0
+            ? program.images.length - 1
+            : prev[programId] - 1,
+      }));
+    }
+  };
+
+  const nextModalImage = () => {
+    if (selectedProgramImages.length > 1) {
+      setSelectedImageIndex((prev) =>
+        prev === selectedProgramImages.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevModalImage = () => {
+    if (selectedProgramImages.length > 1) {
+      setSelectedImageIndex((prev) =>
+        prev === 0 ? selectedProgramImages.length - 1 : prev - 1
+      );
+    }
   };
 
   const filteredPrograms = programs.filter(
@@ -254,6 +321,16 @@ const Projects = () => {
             100% { background-position: 200% center; }
           }
           
+          @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+          }
+          
+          @keyframes slideOut {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
+          }
+          
           .float-gentle { animation: floatGentle 6s ease-in-out infinite; }
           .breathe { animation: breathe 4s ease-in-out infinite; }
           .gentle-glow { animation: gentleGlow 3s ease-in-out infinite; }
@@ -301,6 +378,72 @@ const Projects = () => {
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             animation: shimmer 2s infinite;
+          }
+          
+          .image-carousel {
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+          }
+          
+          .carousel-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-50%) scale(1.1);
+          }
+          
+          .carousel-button.prev {
+            left: 8px;
+          }
+          
+          .carousel-button.next {
+            right: 8px;
+          }
+          
+          .image-carousel:hover .carousel-button {
+            opacity: 1;
+          }
+          
+          .carousel-indicators {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+          }
+          
+          .carousel-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .carousel-indicator.active {
+            background: white;
+            transform: scale(1.2);
           }
         `,
         }}
@@ -515,6 +658,10 @@ const Projects = () => {
                   program.programType
                 );
                 const colorScheme = getColorSchemeForType(program.programType);
+                const currentImageIndex = imageCarousels[program._id] || 0;
+                const hasImages = program.images && program.images.length > 0;
+                const hasMultipleImages =
+                  hasImages && program.images.length > 1;
 
                 return (
                   <div
@@ -527,101 +674,246 @@ const Projects = () => {
                   >
                     <div className="gradient-border">
                       <div className="glass-card rounded-3xl overflow-hidden h-full">
-                        {/* Program Header */}
+                        {/* Program Header with Image/Icon */}
                         <div
-                          className={`relative h-48 bg-gradient-to-br ${colorScheme.primary} flex items-center justify-center overflow-hidden`}
+                          className={`relative h-48 bg-gradient-to-br ${colorScheme.primary} flex items-center justify-center overflow-hidden image-carousel`}
                         >
-                          {/* Subtle Pattern */}
-                          <div className="absolute inset-0 opacity-20">
-                            {[...Array(12)].map((_, i) => (
-                              <div
-                                key={i}
-                                className="absolute w-1.5 h-1.5 rounded-full animate-pulse"
-                                style={{
-                                  backgroundColor: colorScheme.particle,
-                                  left: `${Math.random() * 100}%`,
-                                  top: `${Math.random() * 100}%`,
-                                  animationDelay: `${Math.random() * 3}s`,
+                          {hasImages ? (
+                            <>
+                              {/* Image Display */}
+                              <img
+                                src={program.images[currentImageIndex].url}
+                                alt={program.title}
+                                className="w-full h-full object-cover transition-all duration-500"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openImageModal(
+                                    program.images,
+                                    currentImageIndex
+                                  );
                                 }}
                               />
-                            ))}
-                          </div>
 
-                          <div className="relative z-10">
-                            <IconComponent
-                              className={`w-16 h-16 text-white drop-shadow-lg transition-all duration-300 ${
-                                hoveredCard === program._id ? "scale-110" : ""
-                              }`}
-                            />
-                          </div>
+                              {/* Image Overlay */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
-                          {/* Status Badge */}
-                          <div className="absolute top-4 right-4">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-md ${
-                                program.status === "active"
-                                  ? "bg-green-500/30 text-green-200 border border-green-400/50"
-                                  : "bg-slate-500/30 text-slate-200 border border-slate-400/50"
-                              }`}
-                            >
-                              {program.status?.toUpperCase()}
-                            </span>
-                          </div>
+                              {/* Carousel Controls for Multiple Images */}
+                              {hasMultipleImages && (
+                                <>
+                                  <button
+                                    className="carousel-button prev"
+                                    onClick={(e) =>
+                                      prevCarouselImage(program._id, e)
+                                    }
+                                  >
+                                    <ChevronLeft size={16} />
+                                  </button>
+                                  <button
+                                    className="carousel-button next"
+                                    onClick={(e) =>
+                                      nextCarouselImage(program._id, e)
+                                    }
+                                  >
+                                    <ChevronRight size={16} />
+                                  </button>
 
-                          <Camera className="absolute bottom-4 right-4 w-5 h-5 text-white/50" />
+                                  {/* Carousel Indicators */}
+                                  <div className="carousel-indicators">
+                                    {program.images.map((_, idx) => (
+                                      <div
+                                        key={idx}
+                                        className={`carousel-indicator ${
+                                          idx === currentImageIndex
+                                            ? "active"
+                                            : ""
+                                        }`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setImageCarousels((prev) => ({
+                                            ...prev,
+                                            [program._id]: idx,
+                                          }));
+                                        }}
+                                      />
+                                    ))}
+                                  </div>
+                                </>
+                              )}
+
+                              {/* Image Count Badge */}
+                              {hasMultipleImages && (
+                                <div className="absolute top-4 left-4">
+                                  <span className="px-2 py-1 bg-black/50 backdrop-blur-md text-white text-xs font-medium rounded-full border border-white/20">
+                                    <ImageIcon className="w-3 h-3 inline mr-1" />
+                                    {currentImageIndex + 1}/
+                                    {program.images.length}
+                                  </span>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* Default Icon Display */}
+                              <div className="absolute inset-0 opacity-20">
+                                {[...Array(12)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className="absolute w-1.5 h-1.5 rounded-full animate-pulse"
+                                    style={{
+                                      backgroundColor: colorScheme.particle,
+                                      left: `${Math.random() * 100}%`,
+                                      top: `${Math.random() * 100}%`,
+                                      animationDelay: `${Math.random() * 3}s`,
+                                    }}
+                                  />
+                                ))}
+                              </div>
+
+                              <div className="relative z-10">
+                                <IconComponent
+                                  className={`w-16 h-16 ${colorScheme.accent} float-gentle`}
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {/* View Icon for Images */}
+                          {hasImages && (
+                            <div className="absolute top-4 right-4">
+                              <div className="w-8 h-8 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
+                                <Eye className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 bg-gradient-to-b from-slate-800/80 to-slate-900/80 backdrop-blur-sm">
-                          <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-semibold text-white group-hover:text-purple-300 transition-colors duration-300 leading-tight">
-                              {program.title}
-                            </h3>
-                            <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-300" />
+                        {/* Program Content */}
+                        <div className="p-6">
+                          {/* Program Type Badge */}
+                          <div className="flex items-center justify-between mb-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium border ${colorScheme.border} ${colorScheme.accent}`}
+                              style={{
+                                background: `linear-gradient(135deg, ${colorScheme.particle}20, ${colorScheme.particle}10)`,
+                              }}
+                            >
+                              {program.programType.charAt(0).toUpperCase() +
+                                program.programType.slice(1)}
+                            </span>
+                            {program.status && (
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  program.status === "active"
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30"
+                                    : program.status === "completed"
+                                    ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
+                                    : "bg-amber-500/20 text-amber-300 border border-amber-400/30"
+                                }`}
+                              >
+                                {program.status}
+                              </span>
+                            )}
                           </div>
 
-                          <p className="text-slate-300 mb-6 leading-relaxed text-sm line-clamp-3">
+                          {/* Title */}
+                          <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-rose-400 group-hover:bg-clip-text transition-all duration-300">
+                            {program.title}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-slate-300 text-sm leading-relaxed mb-4 line-clamp-3">
                             {program.description}
                           </p>
 
                           {/* Program Details */}
-                          <div className="space-y-3 mb-6">
-                            {program.startDate && (
-                              <div className="flex items-center text-slate-400 text-sm">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                {new Date(
-                                  program.startDate
-                                ).toLocaleDateString()}
+                          <div className="space-y-2 mb-6">
+                            {program.location && (
+                              <div className="flex items-center text-slate-400 text-xs">
+                                <Mountain className="w-3 h-3 mr-2 text-slate-500" />
+                                <span>{program.location}</span>
                               </div>
                             )}
-                            {program.location && (
-                              <div className="flex items-center text-slate-400 text-sm">
-                                <Globe className="w-4 h-4 mr-2" />
-                                {program.location}
+                            {program.startDate && (
+                              <div className="flex items-center text-slate-400 text-xs">
+                                <Calendar className="w-3 h-3 mr-2 text-slate-500" />
+                                <span>
+                                  Started{" "}
+                                  {new Date(
+                                    program.startDate
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                            {program.beneficiaries && (
+                              <div className="flex items-center text-slate-400 text-xs">
+                                <Users className="w-3 h-3 mr-2 text-slate-500" />
+                                <span>
+                                  {program.beneficiaries} beneficiaries
+                                </span>
                               </div>
                             )}
                           </div>
 
                           {/* Tags */}
                           {program.tags && program.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-6">
-                              {program.tags.slice(0, 2).map((tag, idx) => (
+                            <div className="flex flex-wrap gap-1 mb-4">
+                              {program.tags.slice(0, 3).map((tag, tagIndex) => (
                                 <span
-                                  key={idx}
-                                  className="px-3 py-1 bg-white/10 rounded-full text-xs text-slate-300 border border-white/20"
+                                  key={tagIndex}
+                                  className="px-2 py-1 bg-slate-700/50 text-slate-300 text-xs rounded-md border border-slate-600/30"
                                 >
+                                  <Tag className="w-2 h-2 inline mr-1" />
                                   {tag}
                                 </span>
                               ))}
+                              {program.tags.length > 3 && (
+                                <span className="px-2 py-1 bg-slate-700/50 text-slate-400 text-xs rounded-md border border-slate-600/30">
+                                  +{program.tags.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Progress Bar (if applicable) */}
+                          {program.progress !== undefined && (
+                            <div className="mb-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs text-slate-400">
+                                  Progress
+                                </span>
+                                <span className="text-xs font-medium text-slate-300">
+                                  {program.progress}%
+                                </span>
+                              </div>
+                              <div className="w-full bg-slate-700/50 rounded-full h-2">
+                                <div
+                                  className={`h-2 rounded-full bg-gradient-to-r ${colorScheme.secondary} transition-all duration-1000`}
+                                  style={{ width: `${program.progress}%` }}
+                                />
+                              </div>
                             </div>
                           )}
 
                           {/* Action Button */}
-                          <button className="w-full py-3 bg-gradient-to-r from-purple-500/80 to-pink-500/80 text-white font-medium rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 flex items-center justify-center group-hover:shadow-lg">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Explore Program
-                          </button>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center text-slate-400">
+                              <span className="text-xs font-medium">
+                                Learn More
+                              </span>
+                            </div>
+                            <ArrowRight
+                              className={`w-5 h-5 ${colorScheme.accent} transform group-hover:translate-x-1 transition-transform duration-300`}
+                            />
+                          </div>
                         </div>
+
+                        {/* Hover Overlay Effect */}
+                        <div
+                          className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl ${colorScheme.glow}`}
+                          style={{
+                            background: `linear-gradient(135deg, ${colorScheme.particle}10, transparent)`,
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -630,335 +922,388 @@ const Projects = () => {
             </div>
           )}
 
-          {/* No Results State */}
+          {/* No Programs Found */}
           {!loading && filteredPrograms.length === 0 && (
-            <div className="text-center py-20">
-              <Palette className="w-16 h-16 text-slate-400 mx-auto mb-6 animate-pulse" />
-              <h3 className="text-2xl font-semibold text-white mb-4">
+            <div className="text-center py-16">
+              <div className="flex justify-center mb-6">
+                <Search className="w-16 h-16 text-slate-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-300 mb-4">
                 No Programs Found
               </h3>
-              <p className="text-lg text-slate-400 mb-8 max-w-lg mx-auto">
-                We couldn't find programs matching your search, but Kenya's
-                beauty knows no bounds. Let's explore all possibilities!
+              <p className="text-slate-400 mb-8 max-w-md mx-auto">
+                We couldn't find any programs matching your search criteria. Try
+                adjusting your filters or search terms.
               </p>
               <button
                 onClick={() => {
                   setSearchTerm("");
                   setFilterType("");
                 }}
-                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-300"
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
               >
-                Show All Programs
+                Clear Filters
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Enhanced Modal */}
+      {/* Program Detail Modal */}
       {showModal && selectedProgram && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
-            onClick={closeModal}
-          />
-
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-auto glass-card rounded-3xl border border-white/20 shadow-2xl">
-            {/* Close Button */}
-            <button
-              onClick={closeModal}
-              className="absolute top-6 right-6 z-10 w-10 h-10 bg-red-500/20 hover:bg-red-500/40 rounded-full flex items-center justify-center transition-all duration-300 border border-red-400/30"
-            >
-              <X className="w-5 h-5 text-red-300" />
-            </button>
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg">
+          <div className="glass-card rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/20">
             {/* Modal Header */}
-            <div className="relative h-64 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center overflow-hidden">
-              <div className="absolute inset-0 opacity-20">
-                {[...Array(30)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-2 h-2 rounded-full animate-pulse"
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 3}s`,
-                    }}
-                  />
-                ))}
-              </div>
-
-              <div className="relative z-10 text-center">
-                {(() => {
-                  const IconComponent = getIconForProgramType(
-                    selectedProgram.programType
-                  );
-                  return (
-                    <IconComponent className="w-20 h-20 text-white drop-shadow-lg mb-4 animate-pulse" />
-                  );
-                })()}
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                  {selectedProgram.title}
-                </h2>
-                <p className="text-lg text-white/90">
-                  {selectedProgram.programType?.toUpperCase()}
-                </p>
+            <div className="sticky top-0 z-10 glass-card border-b border-white/10 px-8 py-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {selectedProgram.title}
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                        getColorSchemeForType(selectedProgram.programType)
+                          .border
+                      } ${
+                        getColorSchemeForType(selectedProgram.programType)
+                          .accent
+                      }`}
+                      style={{
+                        background: `linear-gradient(135deg, ${
+                          getColorSchemeForType(selectedProgram.programType)
+                            .particle
+                        }20, ${
+                          getColorSchemeForType(selectedProgram.programType)
+                            .particle
+                        }10)`,
+                      }}
+                    >
+                      {selectedProgram.programType.charAt(0).toUpperCase() +
+                        selectedProgram.programType.slice(1)}
+                    </span>
+                    {selectedProgram.status && (
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedProgram.status === "active"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30"
+                            : selectedProgram.status === "completed"
+                            ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
+                            : "bg-amber-500/20 text-amber-300 border border-amber-400/30"
+                        }`}
+                      >
+                        {selectedProgram.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="w-10 h-10 rounded-full bg-slate-700/50 border border-slate-600/50 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-600/50 transition-all duration-300"
+                >
+                  <X size={20} />
+                </button>
               </div>
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 bg-gradient-to-b from-slate-800/90 to-slate-900/90">
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                <div>
-                  <h3 className="text-xl font-semibold text-purple-300 mb-4 flex items-center">
-                    <Book className="w-5 h-5 mr-2" />
-                    About This Program
-                  </h3>
-                  <p className="text-slate-300 leading-relaxed mb-6">
-                    {selectedProgram.description}
-                  </p>
-                  {selectedProgram.objectives &&
-                    selectedProgram.objectives.length > 0 && (
-                      <div>
-                        <h4 className="text-lg font-medium text-white mb-3">
-                          Key Objectives
-                        </h4>
-                        <ul className="space-y-2">
-                          {selectedProgram.objectives.map((objective, idx) => (
-                            <li
-                              key={idx}
-                              className="flex items-start text-sm text-slate-300"
-                            >
-                              <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 mt-0.5 flex-shrink-0" />
-                              {objective}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold text-purple-300 mb-4 flex items-center">
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Program Details
-                  </h3>
-
-                  <div className="space-y-4">
-                    {selectedProgram.startDate && (
-                      <div className="flex items-center text-slate-300">
-                        <div className="w-24 text-sm text-slate-400">
-                          Start Date:
-                        </div>
-                        <div className="text-sm font-medium">
-                          {new Date(
-                            selectedProgram.startDate
-                          ).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedProgram.endDate && (
-                      <div className="flex items-center text-slate-300">
-                        <div className="w-24 text-sm text-slate-400">
-                          End Date:
-                        </div>
-                        <div className="text-sm font-medium">
-                          {new Date(selectedProgram.endDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedProgram.location && (
-                      <div className="flex items-center text-slate-300">
-                        <div className="w-24 text-sm text-slate-400">
-                          Location:
-                        </div>
-                        <div className="text-sm font-medium flex items-center">
-                          <Globe className="w-4 h-4 mr-1 text-blue-400" />
-                          {selectedProgram.location}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedProgram.budget && (
-                      <div className="flex items-center text-slate-300">
-                        <div className="w-24 text-sm text-slate-400">
-                          Budget:
-                        </div>
-                        <div className="text-sm font-medium flex items-center">
-                          <DollarSign className="w-4 h-4 mr-1 text-green-400" />
-                          {selectedProgram.budget.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedProgram.participants && (
-                      <div className="flex items-center text-slate-300">
-                        <div className="w-24 text-sm text-slate-400">
-                          Participants:
-                        </div>
-                        <div className="text-sm font-medium flex items-center">
-                          <Users className="w-4 h-4 mr-1 text-purple-400" />
-                          {selectedProgram.participants}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center text-slate-300">
-                      <div className="w-24 text-sm text-slate-400">Status:</div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          selectedProgram.status === "active"
-                            ? "bg-green-500/30 text-green-200 border border-green-400/50"
-                            : selectedProgram.status === "completed"
-                            ? "bg-blue-500/30 text-blue-200 border border-blue-400/50"
-                            : "bg-slate-500/30 text-slate-200 border border-slate-400/50"
-                        }`}
+            <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+              {/* Program Images */}
+              {selectedProgram.images && selectedProgram.images.length > 0 && (
+                <div className="px-8 pt-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                    {selectedProgram.images.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative group cursor-pointer rounded-xl overflow-hidden aspect-video"
+                        onClick={() =>
+                          openImageModal(selectedProgram.images, index)
+                        }
                       >
-                        {selectedProgram.status?.toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tags Section */}
-              {selectedProgram.tags && selectedProgram.tags.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-purple-300 mb-4 flex items-center">
-                    <Tag className="w-5 h-5 mr-2" />
-                    Program Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {selectedProgram.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full text-sm text-slate-200 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300"
-                      >
-                        #{tag}
-                      </span>
+                        <img
+                          src={image.url}
+                          alt={image.caption || selectedProgram.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                          <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-700/50">
-                <button className="flex-1 py-4 bg-gradient-to-r from-emerald-500/80 to-teal-500/80 text-white font-medium rounded-xl hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 flex items-center justify-center hover:shadow-lg">
-                  <Heart className="w-5 h-5 mr-2" />
-                  Join This Beautiful Initiative
-                </button>
-                <button className="flex-1 py-4 bg-gradient-to-r from-purple-500/80 to-pink-500/80 text-white font-medium rounded-xl hover:from-purple-500 hover:to-pink-500 transition-all duration-300 flex items-center justify-center hover:shadow-lg">
-                  <Star className="w-5 h-5 mr-2" />
-                  Learn More Details
-                </button>
+              <div className="px-8 pb-8">
+                {/* Program Details Grid */}
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  {selectedProgram.location && (
+                    <div className="glass-card rounded-2xl p-4 border border-white/10">
+                      <div className="flex items-center mb-2">
+                        <Mountain className="w-5 h-5 text-slate-400 mr-2" />
+                        <span className="text-sm font-medium text-slate-300">
+                          Location
+                        </span>
+                      </div>
+                      <p className="text-white font-medium">
+                        {selectedProgram.location}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedProgram.startDate && (
+                    <div className="glass-card rounded-2xl p-4 border border-white/10">
+                      <div className="flex items-center mb-2">
+                        <Calendar className="w-5 h-5 text-slate-400 mr-2" />
+                        <span className="text-sm font-medium text-slate-300">
+                          Start Date
+                        </span>
+                      </div>
+                      <p className="text-white font-medium">
+                        {new Date(selectedProgram.startDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedProgram.beneficiaries && (
+                    <div className="glass-card rounded-2xl p-4 border border-white/10">
+                      <div className="flex items-center mb-2">
+                        <Users className="w-5 h-5 text-slate-400 mr-2" />
+                        <span className="text-sm font-medium text-slate-300">
+                          Beneficiaries
+                        </span>
+                      </div>
+                      <p className="text-white font-medium">
+                        {selectedProgram.beneficiaries.toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                    <Book className="w-5 h-5 mr-2 text-purple-400" />
+                    About This Program
+                  </h3>
+                  <p className="text-slate-300 leading-relaxed text-base">
+                    {selectedProgram.description}
+                  </p>
+                </div>
+
+                {/* Extended Description */}
+                {selectedProgram.extendedDescription && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                      <Sparkles className="w-5 h-5 mr-2 text-rose-400" />
+                      Program Details
+                    </h3>
+                    <div className="prose prose-invert max-w-none">
+                      <p className="text-slate-300 leading-relaxed text-base">
+                        {selectedProgram.extendedDescription}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Progress */}
+                {selectedProgram.progress !== undefined && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                      <CheckCircle className="w-5 h-5 mr-2 text-emerald-400" />
+                      Progress
+                    </h3>
+                    <div className="glass-card rounded-2xl p-6 border border-white/10">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-slate-300">
+                          Completion Status
+                        </span>
+                        <span className="text-2xl font-bold text-white">
+                          {selectedProgram.progress}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-700/50 rounded-full h-3">
+                        <div
+                          className={`h-3 rounded-full bg-gradient-to-r ${
+                            getColorSchemeForType(selectedProgram.programType)
+                              .secondary
+                          } transition-all duration-1000`}
+                          style={{ width: `${selectedProgram.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {selectedProgram.tags && selectedProgram.tags.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                      <Tag className="w-5 h-5 mr-2 text-amber-400" />
+                      Tags
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProgram.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-2 bg-slate-700/50 text-slate-300 text-sm rounded-lg border border-slate-600/30 hover:bg-slate-600/50 transition-colors duration-200"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Objectives */}
+                {selectedProgram.objectives &&
+                  selectedProgram.objectives.length > 0 && (
+                    <div className="mb-8">
+                      <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                        <Star className="w-5 h-5 mr-2 text-yellow-400" />
+                        Objectives
+                      </h3>
+                      <div className="space-y-3">
+                        {selectedProgram.objectives.map((objective, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start glass-card rounded-xl p-4 border border-white/10"
+                          >
+                            <CheckCircle className="w-5 h-5 text-emerald-400 mr-3 mt-0.5 flex-shrink-0" />
+                            <span className="text-slate-300 leading-relaxed">
+                              {objective}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Impact Metrics */}
+                {selectedProgram.impactMetrics &&
+                  selectedProgram.impactMetrics.length > 0 && (
+                    <div className="mb-8">
+                      <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                        <Sparkles className="w-5 h-5 mr-2 text-purple-400" />
+                        Impact Metrics
+                      </h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {selectedProgram.impactMetrics.map((metric, index) => (
+                          <div
+                            key={index}
+                            className="glass-card rounded-xl p-4 border border-white/10 text-center"
+                          >
+                            <div className="text-2xl font-bold text-white mb-1">
+                              {metric.value}
+                            </div>
+                            <div className="text-sm text-slate-300">
+                              {metric.label}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Inspirational Footer Section */}
-      <div className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-purple-900/30 to-transparent" />
-
-        <div className="container mx-auto px-6 relative z-10 text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-6 mb-8">
-              <Mountain className="w-12 h-12 text-blue-400 breathe" />
-              <Sun className="w-16 h-16 text-amber-400 gentle-glow" />
-              <Waves className="w-12 h-12 text-cyan-400 breathe" />
-            </div>
-
-            <h2 className="text-4xl md:text-6xl font-bold mb-8">
-              <span className="block text-shine mb-2">
-                Together We're Creating
-              </span>
-              <span className="block bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                A Kenya That Shines
-              </span>
-            </h2>
-
-            <div className="w-32 h-1 mx-auto mb-8 bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 rounded-full" />
-
-            <p className="text-xl md:text-2xl text-slate-300 mb-12 leading-relaxed font-light">
-              Every program is a brushstroke on the canvas of Kenya's future.
-              Join us in this magnificent journey of transformation, beauty, and
-              hope.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              <div className="glass-card rounded-2xl p-6 border border-white/10 hover:border-emerald-400/30 transition-all duration-500 group">
-                <TreePine className="w-12 h-12 text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  Sustainable Future
-                </h3>
-                <p className="text-slate-400 text-sm">
-                  Growing with nature, not against it
-                </p>
-              </div>
-
-              <div className="glass-card rounded-2xl p-6 border border-white/10 hover:border-blue-400/30 transition-all duration-500 group">
-                <Users className="w-12 h-12 text-blue-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  Strong Communities
-                </h3>
-                <p className="text-slate-400 text-sm">
-                  Building bonds that last generations
-                </p>
-              </div>
-
-              <div className="glass-card rounded-2xl p-6 border border-white/10 hover:border-purple-400/30 transition-all duration-500 group">
-                <Sparkles className="w-12 h-12 text-purple-400 mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" />
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  Endless Beauty
-                </h3>
-                <p className="text-slate-400 text-sm">
-                  Creating wonders beyond imagination
-                </p>
-              </div>
-            </div>
-
-            <button className="px-12 py-4 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 text-white font-semibold rounded-2xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 text-lg">
-              <span className="flex items-center justify-center">
-                <Heart className="w-6 h-6 mr-3 animate-pulse" />
-                Start Your Beautiful Journey
-                <ArrowRight className="w-6 h-6 ml-3" />
-              </span>
+      {/* Image Modal */}
+      {showImageModal && selectedProgramImages.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-lg">
+          <div className="relative max-w-6xl w-full max-h-[90vh]">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 z-10 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-all duration-300"
+            >
+              <X size={24} />
             </button>
+
+            {/* Image Counter */}
+            {selectedProgramImages.length > 1 && (
+              <div className="absolute top-4 left-4 z-10">
+                <span className="px-4 py-2 bg-black/50 backdrop-blur-md text-white text-sm font-medium rounded-full border border-white/20">
+                  {selectedImageIndex + 1} / {selectedProgramImages.length}
+                </span>
+              </div>
+            )}
+
+            {/* Main Image */}
+            <div className="relative h-full flex items-center justify-center">
+              <img
+                src={selectedProgramImages[selectedImageIndex]?.url}
+                alt={
+                  selectedProgramImages[selectedImageIndex]?.caption ||
+                  "Program image"
+                }
+                className="max-w-full max-h-full object-contain rounded-2xl"
+              />
+
+              {/* Navigation Buttons */}
+              {selectedProgramImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevModalImage}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-all duration-300"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button
+                    onClick={nextModalImage}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-all duration-300"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Image Caption */}
+            {selectedProgramImages[selectedImageIndex]?.caption && (
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="bg-black/50 backdrop-blur-md rounded-xl px-6 py-4 border border-white/20">
+                  <p className="text-white text-center">
+                    {selectedProgramImages[selectedImageIndex].caption}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Thumbnail Strip */}
+            {selectedProgramImages.length > 1 && (
+              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-4">
+                {selectedProgramImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                      index === selectedImageIndex
+                        ? "border-white scale-110"
+                        : "border-white/30 hover:border-white/60"
+                    }`}
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.caption || `Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Floating Elements */}
-        <div className="absolute top-10 left-10 opacity-20">
-          <Leaf className="w-8 h-8 text-green-400 float-gentle" />
-        </div>
-        <div className="absolute top-20 right-20 opacity-20">
-          <Flower
-            className="w-6 h-6 text-pink-400 float-gentle"
-            style={{ animationDelay: "1s" }}
-          />
-        </div>
-        <div className="absolute bottom-20 left-20 opacity-20">
-          <Sunrise
-            className="w-10 h-10 text-amber-400 float-gentle"
-            style={{ animationDelay: "2s" }}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };

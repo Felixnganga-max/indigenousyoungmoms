@@ -129,9 +129,9 @@ const Dashboard = () => {
       case "Mission":
       // return <Mission />;
       case "Programs":
-        return <Programs />;
-      case "Projects":
         return <Projects />;
+      case "Projects":
+        return <Programs />;
       case "Content":
         return <Content />;
       default:
@@ -365,7 +365,7 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-8 overflow-auto">
-          <div className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-12 h-full border border-blue-200">
+          <div className="rounded-2xl md:rounded-3xl p-6 md:p-12 h-full">
             {renderActiveTab()}
           </div>
         </main>
