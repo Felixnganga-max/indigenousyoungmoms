@@ -977,7 +977,7 @@ const Gallery = () => {
                         <option value="events">Events</option>
                         <option value="community">Community</option>
                         <option value="celebrations">Celebrations</option>
-                        <option value="workshops">Workshops</option>
+                      <option value="workshops">Workshops</option>
                         <option value="other">Other</option>
                       </select>
                     </div>

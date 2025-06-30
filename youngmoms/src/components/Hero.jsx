@@ -8,6 +8,9 @@ import {
   Trees,
   Users,
   Globe,
+  Award,
+  Shield,
+  Heart,
 } from "lucide-react";
 import { assets } from "../assets/assets";
 
@@ -15,7 +18,7 @@ const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Placeholder hero images - replace with your actual image1
+  // Hero images array
   const heroImages = [assets.heroImage, assets.heroImage2, assets.heroImage1];
 
   useEffect(() => {
@@ -28,15 +31,14 @@ const Hero = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 6000);
+    }, 8000);
 
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
-  // Improved parallax calculations
-  const scrollProgress = Math.min(scrollY / (window.innerHeight * 0.8), 1);
-  const parallaxOffset = scrollY * 0.2;
-  const contentOpacity = Math.max(0, 1 - scrollProgress * 1.5);
+  // Refined parallax calculations
+  const scrollProgress = Math.min(scrollY / (window.innerHeight * 0.6), 1);
+  const parallaxOffset = scrollY * 0.15;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
@@ -51,10 +53,10 @@ const Hero = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-800 via-purple-900 to-slate-700">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] bg-[length:50px_50px] animate-pulse"></div>
+      <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,_white_1px,_transparent_0)] bg-[length:60px_60px]"></div>
         </div>
 
         {/* Hero Background Images Slider */}
@@ -62,161 +64,155 @@ const Hero = () => {
           {heroImages.map((image, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                index === currentImageIndex ? "opacity-20" : "opacity-0"
+              className={`absolute inset-0 transition-all duration-2000 ease-in-out ${
+                index === currentImageIndex ? "opacity-100" : "opacity-0"
               }`}
               style={{
                 backgroundImage: `url(${image})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center center",
                 backgroundRepeat: "no-repeat",
-                transform: `translateY(${parallaxOffset}px) scale(1.1)`,
+                transform: `translateY(${parallaxOffset}px) scale(1.05)`,
               }}
             />
           ))}
         </div>
 
-        {/* Reduced Gradient Overlays
-        <div className="absolute inset-0 bg-gradient-to-r from-black/2 via-purple-500/1 to-black/1 z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/1 via-transparent to-black/1 z-[1]" /> */}
-
-        {/* Image Navigation - Improved positioning */}
-        <div className="hidden lg:flex absolute top-1/2 left-6 transform -translate-y-1/2 z-20">
+        {/* Professional Navigation Controls */}
+        <div className="hidden lg:flex absolute top-1/2 left-8 transform -translate-y-1/2 z-20">
           <button
             onClick={prevImage}
-            className="group bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 text-white p-4 rounded-full transition-all duration-300 hover:scale-110 hover:border-white/40"
+            className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
+            aria-label="Previous image"
           >
-            <ChevronLeft className="w-5 h-5 group-hover:text-cyan-400 transition-colors" />
+            <ChevronLeft className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
           </button>
         </div>
 
-        <div className="hidden lg:flex absolute top-1/2 right-6 transform -translate-y-1/2 z-20">
+        <div className="hidden lg:flex absolute top-1/2 right-8 transform -translate-y-1/2 z-20">
           <button
             onClick={nextImage}
-            className="group bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 text-white p-4 rounded-full transition-all duration-300 hover:scale-110 hover:border-white/40"
+            className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
+            aria-label="Next image"
           >
-            <ChevronRight className="w-5 h-5 group-hover:text-cyan-400 transition-colors" />
+            <ChevronRight className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
           </button>
         </div>
-
+        {/* Main Content Container */}
         {/* Main Content Container */}
         <div className="relative z-10 flex items-center min-h-screen">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
-            <div
-              className="max-w-4xl mx-auto lg:mx-0 text-center lg:text-left"
-              style={{ opacity: contentOpacity }}
-            >
-              {/* Enhanced Badge */}
-              <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 backdrop-blur-xl border border-purple-400/30 rounded-full px-6 py-3 mb-8 shadow-2xl">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full py-24">
+            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left bg-black/10 backdrop-blur-xs rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
+              {/* Professional Badge */}
+              <div className="inline-flex items-center space-x-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-8 py-4 mb-12 shadow-lg">
                 <div className="flex items-center space-x-2">
-                  <Star className="w-4 h-4 text-yellow-400 animate-pulse" />
-                  <span className="font-semibold text-sm text-white">
-                    Yaaku Indigenous Tribe
+                  <Award className="w-5 h-5 text-amber-400" />
+                  <span className="font-semibold text-white text-sm">
+                    UNESCO Heritage Project
                   </span>
                 </div>
-                <div className="w-px h-4 bg-white/30"></div>
+                <div className="w-px h-5 bg-white/20"></div>
                 <div className="flex items-center space-x-2">
-                  <Trees className="w-4 h-4 text-green-400" />
-                  <span className="font-medium text-sm text-gray-200">
-                    Mukogodo Forest
+                  <Shield className="w-5 h-5 text-green-400" />
+                  <span className="font-medium text-gray-200 text-sm">
+                    Conservation Initiative
                   </span>
                 </div>
               </div>
 
-              {/* Main Heading with Animation */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[0.9] text-white">
-                <span className="block animate-fade-in-up">
-                  <span className="bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
-                    Preserve
+              {/* Refined Main Heading */}
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-8 leading-tight text-white tracking-tight">
+                <span className="block mb-2">
+                  <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+                    Preserving Heritage,
                   </span>
                 </span>
-                <span
-                  className="block animate-fade-in-up"
-                  style={{ animationDelay: "0.2s" }}
-                >
-                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                    Revive
+                <span className="block mb-2">
+                  <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                    Empowering Communities
                   </span>
                 </span>
-                <span
-                  className="block animate-fade-in-up"
-                  style={{ animationDelay: "0.4s" }}
-                >
-                  <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    Thrive
+                <span className="block">
+                  <span className="bg-gradient-to-r from-teal-400 via-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    Protecting Future
                   </span>
                 </span>
               </h1>
 
-              {/* Enhanced Subtitle */}
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto lg:mx-0 leading-relaxed font-light">
+              {/* Professional Subtitle */}
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-12 max-w-4xl mx-auto lg:mx-0 leading-relaxed font-light">
                 Reviving the endangered{" "}
-                <span className="text-cyan-400 font-semibold">
+                <span className="text-cyan-800 font-medium">
                   Yaakunte language
                 </span>{" "}
-                and preserving Yaaku culture while empowering indigenous young
-                mothers in{" "}
-                <span className="text-green-400 font-semibold">
+                through innovative technology while preserving Yaaku cultural
+                heritage and empowering indigenous communities in{" "}
+                <span className="text-green-300 font-medium">
                   Mukogodo Forest
                 </span>
                 .
               </p>
 
-              {/* Enhanced CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-16 justify-center lg:justify-start">
-                <button className="group relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-lg overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+              {/* Professional CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-6 mb-20 justify-center lg:justify-start">
+                <a
+                  href="/missions"
+                  className="group relative bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-10 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] shadow-xl flex items-center justify-center space-x-3 text-base"
+                >
                   <span className="relative">Support Our Mission</span>
                   <ArrowRight className="w-5 h-5 relative group-hover:translate-x-1 transition-transform" />
-                </button>
+                </a>
 
-                <button className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center space-x-3 text-lg overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                <a
+                  href="/contact"
+                  className="group relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-10 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] shadow-xl flex items-center justify-center space-x-3 text-base"
+                >
                   <Play className="w-5 h-5 relative" />
                   <span className="relative">Learn Yaakunte</span>
-                </button>
+                </a>
               </div>
 
-              {/* Enhanced Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto lg:mx-0">
+              {/* Professional Impact Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto lg:mx-0">
                 {[
                   {
-                    number: "8,000",
-                    label: "Yaaku People",
+                    number: "8,000+",
+                    label: "Yaaku People Served",
                     icon: Users,
-                    gradient: "from-cyan-400 to-blue-500",
-                    bg: "from-cyan-500/10 to-blue-500/10",
+                    color: "text-blue-400",
+                    bg: "from-blue-500/5 to-blue-600/5",
+                    border: "border-blue-400/20",
                   },
                   {
                     number: "1",
-                    label: "Fluent Speaker Left",
-                    icon: Globe,
-                    gradient: "from-red-400 to-orange-500",
-                    bg: "from-red-500/10 to-orange-500/10",
+                    label: "Fluent Speaker Remaining",
+                    icon: Heart,
+                    color: "text-red-400",
+                    bg: "from-red-500/5 to-red-600/5",
+                    border: "border-red-400/20",
                   },
                   {
                     number: "74K",
-                    label: "Acres Protected",
+                    label: "Acres Under Protection",
                     icon: Trees,
-                    gradient: "from-green-400 to-emerald-500",
-                    bg: "from-green-500/10 to-emerald-500/10",
+                    color: "text-green-400",
+                    bg: "from-green-500/5 to-green-600/5",
+                    border: "border-green-400/20",
                   },
                 ].map((stat, index) => (
                   <div
                     key={index}
-                    className={`bg-gradient-to-br ${stat.bg} backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300 shadow-2xl`}
+                    className={`bg-gradient-to-br ${stat.bg} backdrop-blur-md border ${stat.border} rounded-xl p-8 text-center transform hover:scale-105 transition-all duration-300 shadow-lg`}
                   >
-                    <div className="flex justify-center mb-3">
-                      <stat.icon
-                        className={`w-8 h-8 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
-                      />
+                    <div className="flex justify-center mb-4">
+                      <stat.icon className={`w-8 h-8 ${stat.color}`} />
                     </div>
                     <div
-                      className={`text-3xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent mb-2`}
+                      className={`text-2xl sm:text-3xl font-bold ${stat.color} mb-2`}
                     >
                       {stat.number}
                     </div>
-                    <div className="text-gray-300 font-medium text-sm">
+                    <div className="text-gray-300 font-medium text-sm leading-tight">
                       {stat.label}
                     </div>
                   </div>
@@ -225,106 +221,103 @@ const Hero = () => {
             </div>
           </div>
         </div>
-
-        {/* Image Indicators - Better positioning */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-3">
+        {/* Refined Image Indicators */}
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20 flex space-x-4">
           {heroImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 index === currentImageIndex
-                  ? "bg-gradient-to-r from-cyan-400 to-purple-400 scale-125 shadow-lg"
-                  : "bg-white/40 hover:bg-white/60 hover:scale-110"
+                  ? "bg-blue-400 scale-125 shadow-md"
+                  : "bg-white/30 hover:bg-white/50 hover:scale-110"
               }`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
 
-        {/* Enhanced Scroll Indicator */}
-        <div className="hidden sm:block absolute bottom-6 right-8 animate-bounce z-10">
-          <div className="w-8 h-12 border-2 border-gradient-to-b from-cyan-400 to-purple-400 rounded-full flex justify-center backdrop-blur-sm bg-white/5">
-            <div className="w-1.5 h-4 bg-gradient-to-b from-cyan-400 to-purple-400 rounded-full mt-2 animate-pulse"></div>
+        {/* Professional Scroll Indicator */}
+        <div className="hidden sm:block absolute bottom-8 right-12 z-10">
+          <div className="w-6 h-10 border border-white/20 rounded-full flex justify-center items-start pt-2 backdrop-blur-sm bg-white/5">
+            <div className="w-1 h-3 bg-blue-400 rounded-full animate-bounce"></div>
           </div>
         </div>
       </section>
 
-      {/* Improved Second Section */}
-      <section className="bg-gradient-to-b from-slate-900 via-gray-900 to-black min-h-screen relative">
-        {/* Decorative Elements */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-slate-900 to-transparent"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      {/* Enhanced Second Section */}
+      <section className="bg-gradient-to-b from-gray-900 via-slate-900 to-gray-900 min-h-screen relative">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-24">
           <div className="text-center text-white">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-              Saving an Ancient Culture
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
+              Preserving Ancient Wisdom for Tomorrow
             </h2>
-            <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              From the last fluent speaker to AI-powered language
-              revival—preserving{" "}
-              <span className="text-cyan-400 font-semibold">Yaakunte</span> for
-              future generations
+            <p className="text-lg md:text-xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed">
+              From the last fluent speaker to cutting-edge AI
+              technology—safeguarding{" "}
+              <span className="text-cyan-300 font-medium">Yaakunte</span> and
+              ensuring cultural continuity for future generations
             </p>
 
-            {/* Enhanced Progress Indicator */}
-            <div className="mb-16 max-w-md mx-auto">
-              <div className="text-gray-400 mb-4 font-medium">
-                Cultural Revival Progress
+            {/* Professional Progress Indicator */}
+            <div className="mb-20 max-w-lg mx-auto">
+              <div className="text-gray-400 mb-6 font-medium text-sm">
+                Language Documentation & Revival Progress
               </div>
               <div className="relative">
-                <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden shadow-inner">
+                <div className="w-full h-2 bg-gray-800 rounded-full">
                   <div
-                    className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 transition-all duration-1000 rounded-full shadow-lg"
-                    style={{ width: `${Math.min(65, 100)}%` }}
+                    className="h-full bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 transition-all duration-1000 rounded-full"
+                    style={{ width: "68%" }}
                   />
                 </div>
-                <div className="text-cyan-400 font-bold mt-3">
-                  65% Language Documentation Complete
+                <div className="text-cyan-300 font-semibold mt-4 text-sm">
+                  68% Documentation Complete
                 </div>
               </div>
             </div>
 
-            {/* Enhanced Feature Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            {/* Professional Feature Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-20">
               {[
                 {
-                  title: "Language Revival",
-                  gradient: "from-purple-500 to-pink-500",
-                  icon: "🗣️",
+                  title: "Language Preservation",
+                  icon: "🎓",
                   description:
-                    "AI-powered Yaakunte learning app with Mr. Leriman Leitiko, the last fluent speaker",
-                  accent: "border-purple-400/30",
+                    "Advanced AI-powered learning platform developed with Mr. Leriman Leitiko, preserving linguistic heritage through technology",
+                  accent: "border-blue-400/20 hover:border-blue-400/40",
+                  iconBg: "from-blue-500 to-blue-600",
                 },
                 {
-                  title: "Forest Protection",
-                  gradient: "from-green-500 to-emerald-500",
-                  icon: "🌳",
+                  title: "Environmental Conservation",
+                  icon: "🌲",
                   description:
-                    "Safeguarding 74,000 acres of Mukogodo Forest—Eastern Africa's largest indigenous forest",
-                  accent: "border-green-400/30",
+                    "Protecting 74,000 acres of Mukogodo Forest—Eastern Africa's largest indigenous forest ecosystem",
+                  accent: "border-green-400/20 hover:border-green-400/40",
+                  iconBg: "from-green-500 to-green-600",
                 },
                 {
-                  title: "Sustainable Livelihoods",
-                  gradient: "from-cyan-500 to-blue-500",
-                  icon: "🍯",
+                  title: "Community Empowerment",
+                  icon: "🏘️",
                   description:
-                    "Yaaku Sica honey project and traditional knowledge-based income for young mothers",
-                  accent: "border-cyan-400/30",
+                    "Sustainable livelihood programs including Yaaku Sica honey project, supporting young mothers and families",
+                  accent: "border-amber-400/20 hover:border-amber-400/40",
+                  iconBg: "from-amber-500 to-amber-600",
                 },
               ].map((item, index) => (
                 <div
                   key={index}
-                  className={`group bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-xl rounded-2xl p-8 border ${item.accent} hover:border-opacity-60 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 shadow-2xl`}
+                  className={`group bg-white/5 backdrop-blur-md rounded-xl p-8 border ${item.accent} transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 shadow-lg`}
                 >
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} mx-auto mb-6 flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.iconBg} mx-auto mb-6 flex items-center justify-center text-xl shadow-md group-hover:scale-110 transition-transform duration-300`}
                   >
                     {item.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-4 text-white group-hover:text-cyan-100 transition-colors">
+                  <h3 className="text-xl font-bold mb-4 text-white group-hover:text-blue-100 transition-colors">
                     {item.title}
                   </h3>
-                  <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+                  <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors text-sm">
                     {item.description}
                   </p>
                 </div>
@@ -333,24 +326,6 @@ const Hero = () => {
           </div>
         </div>
       </section>
-
-      <style jsx>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
     </>
   );
 };
