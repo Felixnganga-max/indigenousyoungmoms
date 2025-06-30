@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const gallerySchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, "Title is required"],
+    // required: [true, "Title is required"],
     trim: true,
   },
   description: {
@@ -25,7 +25,7 @@ const gallerySchema = new mongoose.Schema({
   },
   event: {
     type: String,
-    required: [true, "Event name is required"],
+    // required: [true, "Event name is required"],
     trim: true,
   },
 
