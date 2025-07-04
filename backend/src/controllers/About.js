@@ -183,7 +183,8 @@ const updateAbout = async (req, res) => {
     const updatedData = {
       ...aboutContent.toObject(), // existing data
       ...req.body, // updates
-      lastUpdatedBy: req.user ? req.user.name : "Admin",
+      lastUpdatedBy: "Admin", // Simplified since we removed user role check
+      lastUpdatedAt: new Date(), // Added timestamp
     };
 
     const updatedAbout = await About.findByIdAndUpdate(
@@ -201,6 +202,8 @@ const updateAbout = async (req, res) => {
       data: updatedAbout,
     });
   } catch (error) {
+    console.error("Update error:", error); // Added error logging
+
     if (error.name === "ValidationError") {
       const errors = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
@@ -209,12 +212,14 @@ const updateAbout = async (req, res) => {
         errors,
       });
     }
+
     if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
         message: "Invalid ID format",
       });
     }
+
     res.status(500).json({
       success: false,
       message: "Server Error",
