@@ -167,6 +167,7 @@ const createAbout = async (req, res) => {
 // @desc    Update about content
 // @route   PUT /api/about/:id
 // @access  Private/Admin
+// In your backend route handler
 const updateAbout = async (req, res) => {
   try {
     const aboutContent = await About.findById(req.params.id);
@@ -178,12 +179,16 @@ const updateAbout = async (req, res) => {
       });
     }
 
-    // Add lastUpdatedBy field
-    req.body.lastUpdatedBy = req.user ? req.user.name : "Admin";
+    // Merge existing content with updates
+    const updatedData = {
+      ...aboutContent.toObject(), // existing data
+      ...req.body, // updates
+      lastUpdatedBy: req.user ? req.user.name : "Admin",
+    };
 
     const updatedAbout = await About.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updatedData,
       {
         new: true,
         runValidators: true,
