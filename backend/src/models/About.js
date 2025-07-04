@@ -6,27 +6,27 @@ const aboutSchema = new mongoose.Schema(
     heroContent: {
       title: {
         type: String,
-        required: true,
+        // required: true,
         default: "Yaaku Indigenous Tribe",
       },
       subtitle: {
         type: String,
-        required: true,
+        // required: true,
         default: "Guardians of Mukogodo Forest • Keepers of Ancient Wisdom",
       },
       statistics: [
         {
           label: {
             type: String,
-            required: true,
+            // required: true,
           },
           value: {
             type: String,
-            required: true,
+            // required: true,
           },
           color: {
             type: String,
-            required: true,
+            // required: true,
             enum: ["amber", "red", "orange", "emerald", "purple", "blue"],
           },
         },
@@ -37,12 +37,12 @@ const aboutSchema = new mongoose.Schema(
     images: {
       hero: {
         type: String,
-        required: true,
+        // required: true,
       },
       objectives: [
         {
           type: String,
-          required: true,
+          // required: true,
         },
       ],
     },
@@ -51,44 +51,44 @@ const aboutSchema = new mongoose.Schema(
     visionMission: {
       title: {
         type: String,
-        required: true,
+        // required: true,
         default: "Our Foundation",
       },
       subtitle: {
         type: String,
-        required: true,
+        // required: true,
         default: "The pillars that guide our community's journey forward",
       },
       vision: {
         title: {
           type: String,
-          required: true,
+          // required: true,
           default: "VISION",
         },
         color: {
           type: String,
-          required: true,
+          // required: true,
           default: "amber",
         },
         description: {
           type: String,
-          required: true,
+          // required: true,
         },
       },
       mission: {
         title: {
           type: String,
-          required: true,
+          // required: true,
           default: "MISSION",
         },
         color: {
           type: String,
-          required: true,
+          // required: true,
           default: "emerald",
         },
         description: {
           type: String,
-          required: true,
+          // required: true,
         },
       },
     },
@@ -97,12 +97,12 @@ const aboutSchema = new mongoose.Schema(
     objectives: {
       title: {
         type: String,
-        required: true,
+        // required: true,
         default: "Our Objectives",
       },
       subtitle: {
         type: String,
-        required: true,
+        // required: true,
         default:
           "Dedicated to preserving heritage, empowering communities, and protecting our sacred lands",
       },
@@ -110,23 +110,23 @@ const aboutSchema = new mongoose.Schema(
         {
           id: {
             type: String,
-            required: true,
+            // required: true,
           },
           title: {
             type: String,
-            required: true,
+            // required: true,
           },
           description: {
             type: String,
-            required: true,
+            // required: true,
           },
           icon: {
             type: String,
-            required: true,
+            // required: true,
           },
           color: {
             type: String,
-            required: true,
+            // required: true,
             enum: ["amber", "red", "orange", "emerald", "purple", "blue"],
           },
         },
@@ -137,12 +137,12 @@ const aboutSchema = new mongoose.Schema(
     historyContent: {
       title: {
         type: String,
-        required: true,
+        // required: true,
         default: "Background History",
       },
       subtitle: {
         type: String,
-        required: true,
+        // required: true,
         default:
           "From the Western slopes of Mount Kenya, the Yaaku people have been guardians of Mukogodo Forest for generations",
       },
@@ -150,15 +150,15 @@ const aboutSchema = new mongoose.Schema(
         {
           id: {
             type: String,
-            required: true,
+            // required: true,
           },
           title: {
             type: String,
-            required: true,
+            // required: true,
           },
           content: {
             type: String,
-            required: true,
+            // required: true,
           },
           icon: {
             type: String,
@@ -169,7 +169,7 @@ const aboutSchema = new mongoose.Schema(
           },
           alwaysVisible: {
             type: Boolean,
-            default: false,
+            // default: false,
           },
         },
       ],
@@ -180,19 +180,19 @@ const aboutSchema = new mongoose.Schema(
       {
         title: {
           type: String,
-          required: true,
+          // required: true,
         },
         description: {
           type: String,
-          required: true,
+          // required: true,
         },
         icon: {
           type: String,
-          required: true,
+          // required: true,
         },
         color: {
           type: String,
-          required: true,
+          // required: true,
           enum: ["amber", "red", "orange", "emerald", "purple", "blue"],
         },
       },
@@ -202,36 +202,36 @@ const aboutSchema = new mongoose.Schema(
     callToAction: {
       title: {
         type: String,
-        required: true,
+        // required: true,
         default: "Join Our Mission",
       },
       subtitle: {
         type: String,
-        required: true,
+        // required: true,
         default:
           "Help us preserve the Yaaku heritage, protect Mukogodo Forest, and ensure our ancient wisdom survives for future generations.",
       },
       primaryButton: {
         text: {
           type: String,
-          required: true,
+          // required: true,
           default: "Support Our Cause",
         },
         icon: {
           type: String,
-          required: true,
+          // required: true,
           default: "Heart",
         },
       },
       secondaryButton: {
         text: {
           type: String,
-          required: true,
+          // required: true,
           default: "Learn More",
         },
         icon: {
           type: String,
-          required: true,
+          // required: true,
           default: "Camera",
         },
       },
@@ -239,15 +239,15 @@ const aboutSchema = new mongoose.Schema(
         {
           label: {
             type: String,
-            required: true,
+            // required: true,
           },
           value: {
             type: String,
-            required: true,
+            // required: true,
           },
           color: {
             type: String,
-            required: true,
+            // required: true,
             enum: ["amber", "red", "orange", "emerald", "purple", "blue"],
           },
         },
@@ -257,7 +257,7 @@ const aboutSchema = new mongoose.Schema(
     // Meta fields
     isActive: {
       type: Boolean,
-      default: true,
+      // default: true,
     },
     version: {
       type: String,
