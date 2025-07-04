@@ -8,6 +8,7 @@ const programRoutes = require("./routes/Programs");
 const projectRoutes = require("./routes/Projects");
 const contentRoutes = require("./routes/Content");
 const eventsRoute = require("./routes/Events");
+const aboutRoutes = require("./routes/About");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/programs", programRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/content", contentRoutes);
 app.use("/api/events", eventsRoute);
+app.use("/api/about", aboutRoutes); // Add this line
 
 // Health check route
 app.get("/api/health", (req, res) => {
