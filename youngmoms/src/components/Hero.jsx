@@ -53,13 +53,8 @@ const Hero = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900">
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,_white_1px,_transparent_0)] bg-[length:60px_60px]"></div>
-        </div>
-
-        {/* Hero Background Images Slider */}
+      <section className="relative min-h-screen overflow-hidden">
+        {/* Hero Background Images Slider - NO OVERLAY */}
         <div className="absolute inset-0 z-0">
           {heroImages.map((image, index) => (
             <div
@@ -92,19 +87,19 @@ const Hero = () => {
         <div className="hidden lg:flex absolute top-1/2 right-8 transform -translate-y-1/2 z-20">
           <button
             onClick={nextImage}
-            className="group text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
+            className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
             aria-label="Next image"
           >
             <ChevronRight className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
           </button>
         </div>
-        {/* Main Content Container */}
+
         {/* Main Content Container */}
         <div className="relative z-10 flex items-center min-h-screen">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full py-24">
-            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left bg-black/1 rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
+            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left  rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
               {/* Professional Badge */}
-              <div className="inline-flex items-center space-x-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-8 py-4 mb-12 shadow-lg">
+              <div className="inline-flex items-center space-x-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-8 py-4 mb-12 shadow-lg">
                 <div className="flex items-center space-x-2">
                   <Award className="w-5 h-5 text-amber-400" />
                   <span className="font-semibold text-white text-sm">
@@ -142,7 +137,7 @@ const Hero = () => {
               {/* Professional Subtitle */}
               <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-12 max-w-4xl mx-auto lg:mx-0 leading-relaxed font-light">
                 Reviving the endangered{" "}
-                <span className="text-cyan-800 font-medium">
+                <span className="text-cyan-300 font-medium">
                   Yaakunte language
                 </span>{" "}
                 through innovative technology while preserving Yaaku cultural
@@ -221,6 +216,7 @@ const Hero = () => {
             </div>
           </div>
         </div>
+
         {/* Refined Image Indicators */}
         <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20 flex space-x-4">
           {heroImages.map((_, index) => (
