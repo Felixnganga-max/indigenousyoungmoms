@@ -17,6 +17,7 @@ import { assets } from "../assets/assets";
 const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Hero images array
   const heroImages = [assets.heroImage, assets.heroImage2, assets.heroImage1];
@@ -25,6 +26,11 @@ const Hero = () => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Set loaded state immediately
+  useEffect(() => {
+    setIsLoaded(true);
   }, []);
 
   // Auto-slide functionality
@@ -59,8 +65,14 @@ const Hero = () => {
           {heroImages.map((image, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-all duration-2000 ease-in-out ${
+              className={`absolute inset-0 ${
                 index === currentImageIndex ? "opacity-100" : "opacity-0"
+              } ${
+                index === 0 && !isLoaded
+                  ? "opacity-100"
+                  : index !== currentImageIndex
+                  ? "transition-opacity duration-2000 ease-in-out"
+                  : "transition-opacity duration-2000 ease-in-out"
               }`}
               style={{
                 backgroundImage: `url(${image})`,

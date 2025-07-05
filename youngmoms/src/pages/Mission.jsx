@@ -20,7 +20,6 @@ import {
   ExternalLink,
   Heart,
   Share2,
-  Sparkles,
   Award,
   BookOpen,
   TreePine,
@@ -40,45 +39,60 @@ const Mission = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const categories = [
-    { value: "all", label: "All Events", color: "bg-emerald-600", icon: Globe },
+    {
+      value: "all",
+      label: "All Events",
+      color: "bg-gray-100 text-gray-700",
+      icon: Globe,
+    },
     {
       value: "ceremony",
       label: "Ceremony",
-      color: "bg-purple-600",
+      color: "bg-purple-100 text-purple-700",
       icon: Award,
     },
     {
       value: "workshop",
       label: "Workshop",
-      color: "bg-blue-600",
+      color: "bg-blue-100 text-blue-700",
       icon: Coffee,
     },
     {
       value: "community",
       label: "Community",
-      color: "bg-orange-600",
+      color: "bg-orange-100 text-orange-700",
       icon: Users,
     },
     {
       value: "environmental",
       label: "Environmental",
-      color: "bg-green-600",
+      color: "bg-green-100 text-green-700",
       icon: TreePine,
     },
-    { value: "cultural", label: "Cultural", color: "bg-pink-600", icon: Heart },
+    {
+      value: "cultural",
+      label: "Cultural",
+      color: "bg-pink-100 text-pink-700",
+      icon: Heart,
+    },
     {
       value: "educational",
       label: "Educational",
-      color: "bg-indigo-600",
+      color: "bg-indigo-100 text-indigo-700",
       icon: GraduationCap,
     },
     {
       value: "conference",
       label: "Conference",
-      color: "bg-cyan-600",
+      color: "bg-cyan-100 text-cyan-700",
       icon: Briefcase,
     },
-    { value: "meeting", label: "Meeting", color: "bg-slate-600", icon: Mic },
+    {
+      value: "meeting",
+      label: "Meeting",
+      color: "bg-slate-100 text-slate-700",
+      icon: Mic,
+    },
   ];
 
   const whatsappNumber = "0797743366";
@@ -139,7 +153,7 @@ const Mission = () => {
 
   const getCategoryInfo = (category) => {
     const cat = categories.find((c) => c.value === category);
-    return cat || { color: "bg-gray-600", icon: Globe };
+    return cat || { color: "bg-gray-100 text-gray-700", icon: Globe };
   };
 
   const handleWhatsAppContact = (event) => {
@@ -165,115 +179,83 @@ const Mission = () => {
         url: window.location.href,
       });
     } else {
-      // Fallback - copy to clipboard
       navigator.clipboard.writeText(`${event.title} - ${window.location.href}`);
       alert("Event link copied to clipboard!");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-300 via-teal-400 to-cyan-500 text-gray-900">
-      {/* Animated Background Overlay */}
-      <div className="fixed inset-0 bg-gradient-to-r from-emerald-200/30 via-transparent to-teal-200/30 animate-pulse pointer-events-none" />
-
-      {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-emerald-600/95 via-teal-700/95 to-cyan-700/95 backdrop-blur-lg border-b border-emerald-400/50 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 animate-gradient-x" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <div className="min-h-screen bg-gray-50">
+      {/* Clean Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 mb-6 px-6 py-3 bg-gradient-to-r from-emerald-400/30 to-teal-400/30 rounded-full border-2 border-emerald-300/50 backdrop-blur-sm shadow-lg">
-              <Sparkles className="text-yellow-300 animate-pulse" size={20} />
-              <span className="text-base font-bold text-white">
-                Discover Amazing Events
-              </span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
-                Upcoming Events
-              </span>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Upcoming Events
             </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-emerald-50 max-w-4xl mx-auto leading-relaxed font-medium">
-              Join us for incredible experiences, networking opportunities, and
-              memorable moments in your community
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover and join amazing events in your community
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                <Calendar className="text-emerald-200" size={18} />
-                <span className="text-white font-medium">
-                  {events.length} Events
-                </span>
+            <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <Calendar size={16} />
+                <span>{events.length} Events</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                <Users className="text-emerald-200" size={18} />
-                <span className="text-white font-medium">Community Driven</span>
+              <div className="flex items-center gap-2">
+                <Users size={16} />
+                <span>Community Driven</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Search and Filter */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="flex flex-col xl:flex-row gap-6 mb-12">
-          <div className="relative flex-1">
-            <Search
-              className="absolute left-5 top-1/2 transform -translate-y-1/2 text-emerald-600"
-              size={24}
-            />
-            <input
-              type="text"
-              placeholder="Search events by title or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-6 py-5 bg-white/90 backdrop-blur-sm border-2 border-emerald-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 transition-all text-lg font-medium shadow-lg hover:shadow-xl placeholder-emerald-500"
-            />
-          </div>
-
-          <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-            <div className="flex gap-3 min-w-max">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+              <input
+                type="text"
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-2 overflow-x-auto">
               {categories.map((category) => {
                 const IconComponent = category.icon;
                 return (
                   <button
                     key={category.value}
                     onClick={() => setSelectedCategory(category.value)}
-                    className={`group flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
                       selectedCategory === category.value
-                        ? `${category.color} text-white shadow-2xl scale-105 ring-4 ring-white/30`
-                        : "bg-white/80 hover:bg-white/95 text-gray-700 border-2 border-emerald-200 hover:border-emerald-400"
+                        ? "bg-blue-100 text-blue-700 border border-blue-200"
+                        : "bg-gray-50 text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <IconComponent
-                      size={20}
-                      className={
-                        selectedCategory === category.value
-                          ? "text-white"
-                          : "text-emerald-600"
-                      }
-                    />
+                    <IconComponent size={16} />
                     {category.label}
-                    {selectedCategory === category.value && (
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    )}
                   </button>
                 );
               })}
             </div>
           </div>
         </div>
+
         {/* Events Grid */}
         {loading ? (
-          <div className="text-center py-20">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-20 w-20 border-4 border-emerald-200 border-t-emerald-600 mx-auto"></div>
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400/20 to-teal-400/20 animate-pulse"></div>
-            </div>
-            <p className="mt-8 text-2xl font-bold text-emerald-700">
-              Discovering amazing events...
-            </p>
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => {
               const categoryInfo = getCategoryInfo(event.category);
               const IconComponent = categoryInfo.icon;
@@ -281,133 +263,104 @@ const Mission = () => {
               return (
                 <div
                   key={event._id}
-                  className="group bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-sm border-2 border-emerald-200/50 rounded-3xl overflow-hidden hover:border-emerald-400 transition-all duration-500 transform hover:scale-[1.03] hover:shadow-2xl shadow-lg hover:shadow-emerald-200/50 flex flex-col h-full"
+                  className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
-                  {/* Increased image height */}
-                  <div className="relative h-56 sm:h-64 bg-gradient-to-br from-emerald-400/90 via-teal-500/90 to-cyan-500/90 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-transparent to-teal-500/30 animate-pulse" />
-
+                  {/* Event Image/Header */}
+                  <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 p-4">
                     <div className="absolute top-4 left-4">
-                      <div
-                        className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-white ${categoryInfo.color} shadow-lg backdrop-blur-sm border border-white/20`}
+                      <span
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${categoryInfo.color}`}
                       >
-                        <IconComponent size={16} />
+                        <IconComponent size={14} />
                         {event.category}
-                      </div>
+                      </span>
                     </div>
-
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      <button
-                        onClick={() => handleShare(event)}
-                        className="p-3 bg-white/20 rounded-full hover:bg-white/30 transition-all duration-300 backdrop-blur-lg border border-white/30 group-hover:scale-110"
+                    <div className="absolute top-4 right-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          event.ticketPrice === 0
+                            ? "bg-green-100 text-green-700"
+                            : "bg-orange-100 text-orange-700"
+                        }`}
                       >
-                        <Share2 size={18} className="text-white" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowDetailsModal(true);
-                        }}
-                        className="p-3 bg-gradient-to-r from-emerald-500/70 to-teal-500/70 rounded-full hover:from-emerald-500/90 hover:to-teal-500/90 transition-all duration-300 backdrop-blur-lg border border-white/30 group-hover:scale-110"
-                      >
-                        <Eye size={18} className="text-white" />
-                      </button>
+                        {event.ticketPrice === 0
+                          ? "Free"
+                          : `$${event.ticketPrice}`}
+                      </span>
                     </div>
-
                     <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center justify-between">
-                        <span
-                          className={`px-4 py-2 rounded-full text-sm font-bold backdrop-blur-lg border ${
-                            event.ticketPrice === 0
-                              ? "bg-green-500/80 text-white border-green-300/50"
-                              : "bg-orange-500/80 text-white border-orange-300/50"
-                          } shadow-lg`}
-                        >
-                          {event.ticketPrice === 0
-                            ? "FREE EVENT"
-                            : `$${event.ticketPrice}`}
-                        </span>
-                        <div className="flex items-center gap-2 px-3 py-2 bg-yellow-400/90 text-yellow-900 rounded-full backdrop-blur-lg border border-yellow-300/50 shadow-lg">
-                          <Star size={16} fill="currentColor" />
-                          <span className="text-sm font-bold">Featured</span>
-                        </div>
-                      </div>
+                      <h3 className="text-xl font-semibold text-white mb-2 line-clamp-2">
+                        {event.title}
+                      </h3>
                     </div>
                   </div>
 
-                  {/* Content section with increased padding and spacing */}
-                  <div className="p-6 lg:p-8 flex-1 flex flex-col">
-                    <h3 className="text-xl lg:text-2xl font-black mb-4 text-gray-800 group-hover:text-emerald-700 transition-colors duration-300 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm lg:text-base mb-6 line-clamp-3 leading-relaxed flex-grow">
+                  {/* Event Details */}
+                  <div className="p-6">
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                       {event.description}
                     </p>
 
-                    <div className="space-y-4 mb-6">
-                      <div className="flex items-center gap-4 text-sm lg:text-base text-gray-600">
-                        <Calendar
-                          size={18}
-                          className="text-emerald-600 flex-shrink-0"
-                        />
-                        <span className="font-semibold">
-                          {formatDate(event.startDate)}
-                        </span>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar size={16} className="text-gray-400" />
+                        <span>{formatDate(event.startDate)}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm lg:text-base text-gray-600">
-                        <MapPin
-                          size={18}
-                          className="text-emerald-600 flex-shrink-0"
-                        />
-                        <span className="font-semibold line-clamp-1">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin size={16} className="text-gray-400" />
+                        <span className="line-clamp-1">
                           {event.location?.name || "Location TBD"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm lg:text-base text-gray-600">
-                        <Users
-                          size={18}
-                          className="text-emerald-600 flex-shrink-0"
-                        />
-                        <span className="font-semibold">
-                          {event.maxAttendees} max attendees
-                        </span>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Users size={16} className="text-gray-400" />
+                        <span>{event.maxAttendees} attendees</span>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {event.tags?.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 text-xs font-bold rounded-full border border-emerald-300"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                      {event.tags?.length > 3 && (
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full border border-gray-300">
-                          +{event.tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
+                    {/* Tags */}
+                    {event.tags && event.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {event.tags.slice(0, 2).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {event.tags.length > 2 && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                            +{event.tags.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
-                    <div className="flex flex-col sm:flex-row gap-3 mt-auto">
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
                       <button
                         onClick={() => {
                           setSelectedEvent(event);
                           setShowDetailsModal(true);
                         }}
-                        className="flex-1 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 px-4 py-3 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg border border-gray-300"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                       >
-                        <Eye size={18} />
-                        View Details
+                        <Eye size={16} />
+                        Details
                       </button>
                       <button
                         onClick={() => handleWhatsAppContact(event)}
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                       >
-                        <MessageCircle size={18} />
+                        <MessageCircle size={16} />
                         Contact
+                      </button>
+                      <button
+                        onClick={() => handleShare(event)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Share2 size={16} />
                       </button>
                     </div>
                   </div>
@@ -417,23 +370,21 @@ const Mission = () => {
           </div>
         )}
 
+        {/* No Events Found */}
         {filteredEvents.length === 0 && !loading && (
-          <div className="text-center py-20">
-            <div className="bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-lg border-2 border-emerald-200 rounded-3xl p-12 lg:p-16 max-w-lg mx-auto shadow-2xl">
-              <Calendar className="mx-auto mb-8 text-emerald-600" size={80} />
-              <h3 className="text-3xl font-black mb-6 text-emerald-700">
-                No Events Found
-              </h3>
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-                We couldn't find any events matching your criteria. Try
-                adjusting your search or check back later for new events!
+          <div className="text-center py-12">
+            <div className="bg-white rounded-xl border border-gray-200 p-8 max-w-md mx-auto">
+              <Calendar className="mx-auto mb-4 text-gray-400" size={48} />
+              <h3 className="text-lg font-semibold mb-2">No Events Found</h3>
+              <p className="text-gray-600 mb-4">
+                We couldn't find any events matching your criteria.
               </p>
               <button
                 onClick={() => {
                   setSearchTerm("");
                   setSelectedCategory("all");
                 }}
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Reset Filters
               </button>
@@ -444,174 +395,102 @@ const Mission = () => {
 
       {/* Event Details Modal */}
       {showDetailsModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-white via-emerald-50/50 to-white border-2 border-emerald-300 rounded-3xl max-w-6xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-gradient-to-r from-emerald-600/95 via-teal-600/95 to-emerald-600/95 backdrop-blur-lg p-6 lg:p-8 border-b-2 border-emerald-300">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-4 leading-tight">
-                    {selectedEvent.title}
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white ${
-                        getCategoryInfo(selectedEvent.category).color
-                      }`}
-                    >
-                      {React.createElement(
-                        getCategoryInfo(selectedEvent.category).icon,
-                        { size: 16 }
-                      )}
-                      {selectedEvent.category}
-                    </div>
-                    <span
-                      className={`px-4 py-2 rounded-full text-sm font-bold ${
-                        selectedEvent.ticketPrice === 0
-                          ? "bg-green-500/90 text-white"
-                          : "bg-orange-500/90 text-white"
-                      }`}
-                    >
-                      {selectedEvent.ticketPrice === 0
-                        ? "FREE EVENT"
-                        : `$${selectedEvent.ticketPrice}`}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="p-3 hover:bg-white/20 rounded-full transition-colors backdrop-blur-sm border border-white/30"
-                >
-                  <X size={28} className="text-white" />
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedEvent.title}
+              </h2>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={24} />
+              </button>
             </div>
 
-            <div className="p-6 lg:p-10 space-y-10">
-              {/* Event Hero Section */}
-              <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50 rounded-3xl p-8 lg:p-10 border-2 border-emerald-200">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                  <div className="space-y-8">
-                    <div className="flex items-start gap-5">
-                      <Calendar
-                        className="text-emerald-600 flex-shrink-0 mt-1"
-                        size={28}
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
-                          Event Date & Time
-                        </p>
-                        <p className="text-xl font-black text-gray-800 mb-2">
-                          {formatDate(selectedEvent.startDate)}
-                        </p>
-                        <p className="text-base text-gray-600 font-semibold">
-                          Ends: {formatDate(selectedEvent.endDate)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-5">
-                      <MapPin
-                        className="text-emerald-600 flex-shrink-0 mt-1"
-                        size={28}
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
-                          Location
-                        </p>
-                        <p className="text-xl font-black text-gray-800 mb-2">
-                          {selectedEvent.location?.name || "Location TBD"}
-                        </p>
-                        {selectedEvent.location?.address && (
-                          <p className="text-base text-gray-600 font-semibold mb-1">
-                            {selectedEvent.location.address}
-                          </p>
-                        )}
-                        {selectedEvent.location?.city && (
-                          <p className="text-base text-gray-600 font-semibold">
-                            {selectedEvent.location.city},{" "}
-                            {selectedEvent.location.state}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-5">
-                      <Users
-                        className="text-emerald-600 flex-shrink-0 mt-1"
-                        size={28}
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
-                          Capacity
-                        </p>
-                        <p className="text-xl font-black text-gray-800 mb-2">
-                          {selectedEvent.maxAttendees} max attendees
-                        </p>
-                        <p className="text-base text-gray-600 font-semibold">
-                          Registration{" "}
-                          {selectedEvent.registrationRequired
-                            ? "Required"
-                            : "Not Required"}
-                        </p>
-                      </div>
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Event Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Calendar className="text-blue-600 mt-1" size={20} />
+                    <div>
+                      <p className="font-medium text-gray-900">Date & Time</p>
+                      <p className="text-gray-600">
+                        {formatDate(selectedEvent.startDate)}
+                      </p>
+                      <p className="text-gray-600">
+                        Ends: {formatDate(selectedEvent.endDate)}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="space-y-8">
-                    {selectedEvent.organizer?.name && (
-                      <div className="flex items-start gap-5">
-                        <User
-                          className="text-emerald-600 flex-shrink-0 mt-1"
-                          size={28}
-                        />
-                        <div>
-                          <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
-                            Organized by
-                          </p>
-                          <p className="text-xl font-black text-gray-800 mb-2">
-                            {selectedEvent.organizer.name}
-                          </p>
-                          {selectedEvent.organizer.organization && (
-                            <p className="text-base text-gray-600 font-semibold">
-                              {selectedEvent.organizer.organization}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex items-start gap-3">
+                    <MapPin className="text-blue-600 mt-1" size={20} />
+                    <div>
+                      <p className="font-medium text-gray-900">Location</p>
+                      <p className="text-gray-600">
+                        {selectedEvent.location?.name || "Location TBD"}
+                      </p>
+                      {selectedEvent.location?.address && (
+                        <p className="text-gray-600">
+                          {selectedEvent.location.address}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-                    {selectedEvent.organizer?.email && (
-                      <div className="flex items-start gap-5">
-                        <Mail
-                          className="text-emerald-600 flex-shrink-0 mt-1"
-                          size={28}
-                        />
-                        <div>
-                          <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
-                            Email
-                          </p>
-                          <p className="text-xl font-black text-gray-800">
-                            {selectedEvent.organizer.email}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex items-start gap-3">
+                    <Users className="text-blue-600 mt-1" size={20} />
+                    <div>
+                      <p className="font-medium text-gray-900">Capacity</p>
+                      <p className="text-gray-600">
+                        {selectedEvent.maxAttendees} max attendees
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    <div className="flex items-start gap-5">
-                      <DollarSign
-                        className="text-emerald-600 flex-shrink-0 mt-1"
-                        size={28}
-                      />
+                <div className="space-y-4">
+                  {selectedEvent.organizer?.name && (
+                    <div className="flex items-start gap-3">
+                      <User className="text-blue-600 mt-1" size={20} />
                       <div>
-                        <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
-                          Ticket Price
+                        <p className="font-medium text-gray-900">Organizer</p>
+                        <p className="text-gray-600">
+                          {selectedEvent.organizer.name}
                         </p>
-                        <p className="text-xl font-black text-gray-800">
-                          {selectedEvent.ticketPrice === 0
-                            ? "Free Entry"
-                            : `$${selectedEvent.ticketPrice}`}
-                        </p>
+                        {selectedEvent.organizer.organization && (
+                          <p className="text-gray-600">
+                            {selectedEvent.organizer.organization}
+                          </p>
+                        )}
                       </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-start gap-3">
+                    <DollarSign className="text-blue-600 mt-1" size={20} />
+                    <div>
+                      <p className="font-medium text-gray-900">Price</p>
+                      <p className="text-gray-600">
+                        {selectedEvent.ticketPrice === 0
+                          ? "Free"
+                          : `$${selectedEvent.ticketPrice}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <Tag className="text-blue-600 mt-1" size={20} />
+                    <div>
+                      <p className="font-medium text-gray-900">Category</p>
+                      <p className="text-gray-600 capitalize">
+                        {selectedEvent.category}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -619,59 +498,49 @@ const Mission = () => {
 
               {/* Description */}
               {selectedEvent.description && (
-                <div className="bg-white rounded-3xl p-8 lg:p-10 border-2 border-emerald-200 shadow-lg">
-                  <h3 className="text-2xl lg:text-3xl font-black mb-6 text-emerald-700">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">
                     About This Event
                   </h3>
-                  <div className="prose prose-lg max-w-none">
-                    <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap font-medium">
-                      {selectedEvent.description}
-                    </p>
-                  </div>
+                  <p className="text-gray-600 leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
                 </div>
               )}
 
               {/* Tags */}
               {selectedEvent.tags && selectedEvent.tags.length > 0 && (
-                <div className="bg-white rounded-3xl p-8 lg:p-10 border-2 border-emerald-200 shadow-lg">
-                  <h3 className="text-2xl lg:text-3xl font-black mb-6 text-emerald-700">
-                    Event Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
                     {selectedEvent.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-6 py-3 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 rounded-full border-2 border-emerald-300 font-bold text-lg"
+                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
                       >
-                        #{tag}
+                        {tag}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Contact Section */}
-              <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-3xl p-8 lg:p-12 border-2 border-green-400 shadow-2xl">
-                <div className="text-center">
-                  <MessageCircle
-                    className="mx-auto mb-6 text-white"
-                    size={64}
-                  />
-                  <h3 className="text-2xl lg:text-3xl font-black mb-6 text-white">
-                    Interested in This Event?
-                  </h3>
-                  <p className="text-white/90 mb-8 text-lg lg:text-xl leading-relaxed font-medium max-w-2xl mx-auto">
-                    Get in touch with us for more information, registration
-                    details, or any questions you might have!
-                  </p>
-                  <button
-                    onClick={() => handleWhatsAppContact(selectedEvent)}
-                    className="bg-white text-green-600 hover:text-green-700 px-10 py-5 rounded-2xl font-black text-lg lg:text-xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl flex items-center gap-4 mx-auto"
-                  >
-                    <MessageCircle size={28} />
-                    Contact us on WhatsApp
-                  </button>
-                </div>
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => handleWhatsAppContact(selectedEvent)}
+                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={20} />
+                  Contact on WhatsApp
+                </button>
+                <button
+                  onClick={() => handleShare(selectedEvent)}
+                  className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                >
+                  <Share2 size={20} />
+                  Share
+                </button>
               </div>
             </div>
           </div>
