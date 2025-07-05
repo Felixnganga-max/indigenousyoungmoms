@@ -12,16 +12,7 @@ const gallerySchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: [true, "Category is required"],
-    enum: [
-      "workshops",
-      "cultural",
-      "family",
-      "education",
-      "achievements",
-      "community",
-      "support",
-    ],
+    // required: [true, "Category is required"],
   },
   event: {
     type: String,
