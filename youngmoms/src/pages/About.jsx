@@ -35,7 +35,7 @@ const About = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          "http://localhost:3000/api/about/about-data"
+          "https://indigenousyoungmoms-bvv4.vercel.app/api/about/about-data"
         );
 
         if (!response.ok) {
@@ -235,10 +235,12 @@ const About = () => {
           return null;
         }
 
+        const colorClasses = getColorClasses(colorClass);
+
         return (
           <span
             key={index}
-            className={`bg-${colorClass}-600/20 backdrop-blur-sm px-4 py-2 rounded-full border border-${colorClass}-400/40 hover:border-${colorClass}-400/70 transition-all duration-300 hover:scale-105`}
+            className={`${colorClasses.bg} backdrop-blur-sm px-4 py-2 rounded-full border ${colorClasses.border} transition-all duration-300 hover:scale-105 ${colorClasses.text}`}
           >
             {displayText}
           </span>
@@ -298,16 +300,17 @@ const About = () => {
   const callToAction = aboutData.callToAction || {};
   const timelineData = aboutData.timelineData || [];
 
+  // Default fallback image
+  const defaultImage =
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e";
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center">
         <div className="absolute inset-0 opacity-95" style={parallaxBgStyle}>
           <img
-            src={
-              images.hero ||
-              "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
-            }
+            src={images.hero || defaultImage}
             alt="Mukogodo Forest"
             className="w-full h-full object-cover"
           />
@@ -337,9 +340,11 @@ const About = () => {
               {heroContent.subtitle ||
                 "Guardians of Mukogodo Forest • Keepers of Ancient Wisdom"}
             </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base">
-              {renderStatistics(heroContent.statistics)}
-            </div>
+            {heroContent.statistics && heroContent.statistics.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base">
+                {renderStatistics(heroContent.statistics)}
+              </div>
+            )}
           </div>
         </div>
 
@@ -358,10 +363,7 @@ const About = () => {
         <section className="py-20 px-4 relative">
           <div className="absolute inset-0 opacity-10" style={parallaxBgStyle}>
             <img
-              src={
-                images.hero ||
-                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
-              }
+              src={images.hero || defaultImage}
               alt="Forest Background"
               className="w-full h-full object-cover"
             />
@@ -491,10 +493,7 @@ const About = () => {
         <section className="py-20 px-4 relative overflow-hidden">
           <div className="absolute inset-0 opacity-8" style={parallaxBgStyle}>
             <img
-              src={
-                images.hero ||
-                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
-              }
+              src={images.hero || defaultImage}
               alt="Forest Background"
               className="w-full h-full object-cover"
             />
@@ -514,7 +513,7 @@ const About = () => {
                 <div className="w-12 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent"></div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-4">
-                {objectives.title || "Our Objectives"}
+                {objectives.title}
               </h2>
               {objectives.subtitle && (
                 <p className="text-xl text-slate-400 max-w-2xl mx-auto">
@@ -641,47 +640,46 @@ const About = () => {
         </section>
       )}
 
-      {/* History Section - Only show if sections exist */}
-      {historyContent.sections && historyContent.sections.length > 0 && (
-        <section className="py-20 px-4 relative">
-          <div className="absolute inset-0 opacity-5" style={parallaxBgStyle}>
-            <img
-              src={
-                images.hero ||
-                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
-              }
-              alt="Forest Background"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-700/95 to-slate-900/95"></div>
+      {/* History Section */}
+      <section className="py-20 px-4 relative">
+        <div className="absolute inset-0 opacity-5" style={parallaxBgStyle}>
+          <img
+            src={images.hero || defaultImage}
+            alt="Forest Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-700/95 to-slate-900/95"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div
+            className={`text-center mb-16 ${getRevealClass("history-title")}`}
+            data-reveal-id="history-title"
+          >
+            <div className="inline-flex items-center gap-3 mb-6">
+              <div className="w-12 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+              <BookOpen className="w-8 h-8 text-amber-400" />
+              <div className="w-12 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent"></div>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-4">
+              {historyContent.title || "Our Heritage"}
+            </h2>
+            {historyContent.subtitle && (
+              <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+                {historyContent.subtitle}
+              </p>
+            )}
           </div>
 
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div
-              className={`text-center mb-16 ${getRevealClass("history-title")}`}
-              data-reveal-id="history-title"
-            >
-              <div className="inline-flex items-center gap-3 mb-6">
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
-                <BookOpen className="w-8 h-8 text-amber-400" />
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent"></div>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-4">
-                {historyContent.title || "Our Heritage"}
-              </h2>
-              {historyContent.subtitle && (
-                <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-                  {historyContent.subtitle}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-8">
-              {historyContent.sections.map((section, index) => {
+          {/* History Sections */}
+          <div className="space-y-8">
+            {historyContent.sections && historyContent.sections.length > 0 ? (
+              historyContent.sections.map((section, index) => {
                 const IconComponent = getIconComponent(section.icon);
-                const isVisible = showFullHistory || section.alwaysVisible;
+                const isVisible =
+                  showFullHistory || section.alwaysVisible || index === 0;
 
-                if (!isVisible && index >= 1) return null;
+                if (!isVisible) return null;
 
                 return (
                   <div
@@ -723,166 +721,118 @@ const About = () => {
                           >
                             {section.title}
                           </h3>
-                          <p className="text-slate-300 text-lg leading-relaxed">
-                            {section.content}
-                          </p>
+                          <div className="prose prose-slate prose-lg max-w-none">
+                            <p className="text-slate-300 leading-relaxed">
+                              {section.content}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 );
-              })}
-            </div>
-
-            {/* Show More/Less Button */}
-            {historyContent.sections.length > 1 && (
-              <div className="text-center mt-12">
-                <button
-                  onClick={() => setShowFullHistory(!showFullHistory)}
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-amber-600/20 backdrop-blur-sm rounded-full border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10"
-                >
-                  <BookOpen className="w-5 h-5 text-amber-400 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="text-amber-400 font-medium">
-                    {showFullHistory ? "Show Less" : "Discover More"}
-                  </span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-amber-400 transition-transform duration-300 ${
-                      showFullHistory ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
+              })
+            ) : (
+              <div className="text-center py-16">
+                <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                <p className="text-xl text-slate-400">
+                  History content is being prepared...
+                </p>
               </div>
             )}
           </div>
-        </section>
-      )}
 
-      {/* Timeline Section - Only show if timeline data exists */}
-      {timelineData && timelineData.length > 0 && (
+          {/* Show More/Less Button */}
+          {historyContent.sections && historyContent.sections.length > 1 && (
+            <div className="text-center mt-12">
+              <button
+                onClick={() => setShowFullHistory(!showFullHistory)}
+                className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold transition-all duration-300 hover:from-amber-600 hover:to-orange-600 hover:shadow-lg hover:shadow-amber-500/25 hover:scale-105"
+              >
+                <span>
+                  {showFullHistory ? "Show Less" : "Explore Full History"}
+                </span>
+                <ChevronDown
+                  className={`w-5 h-5 transition-transform duration-300 ${
+                    showFullHistory ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </div>
+          )}
+
+          {/* Timeline */}
+          {timelineData && timelineData.length > 0 && (
+            <div className="mt-20">
+              <div
+                className={`text-center mb-12 ${getRevealClass(
+                  "timeline-title"
+                )}`}
+                data-reveal-id="timeline-title"
+              >
+                <h3 className="text-3xl font-bold text-slate-300 mb-4">
+                  Historical Timeline
+                </h3>
+                <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-orange-400 mx-auto rounded-full"></div>
+              </div>
+
+              <div className="relative">
+                {/* Timeline Line */}
+                <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-orange-400 to-amber-400 rounded-full"></div>
+
+                {timelineData.map((item, index) => (
+                  <div
+                    key={item.id || index}
+                    className={`relative flex items-start gap-8 pb-12 ${getRevealClass(
+                      `timeline-${index + 1}`,
+                      index * 100
+                    )}`}
+                    data-reveal-id={`timeline-${index + 1}`}
+                  >
+                    {/* Timeline Dot */}
+                    <div className="relative flex-shrink-0 w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full"></div>
+                      </div>
+                      {/* Pulse Effect */}
+                      <div className="absolute inset-0 rounded-full bg-amber-400/30 animate-ping"></div>
+                    </div>
+
+                    {/* Timeline Content */}
+                    <div className="flex-1 bg-slate-800/20 backdrop-blur-sm p-6 rounded-2xl border border-slate-700/50 hover:border-amber-400/40 transition-all duration-300">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="text-xl font-bold text-amber-400">
+                          {item.year || item.period}
+                        </h4>
+                        <span className="text-sm text-slate-400 bg-slate-700/50 px-3 py-1 rounded-full">
+                          {item.era || "Historical Period"}
+                        </span>
+                      </div>
+                      <h5 className="text-lg font-semibold text-slate-200 mb-2">
+                        {item.title}
+                      </h5>
+                      <p className="text-slate-300 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      {callToAction.title && (
         <section className="py-20 px-4 relative">
-          <div className="absolute inset-0 opacity-5" style={parallaxBgStyle}>
+          <div className="absolute inset-0 opacity-20" style={parallaxBgStyle}>
             <img
-              src={
-                images.hero ||
-                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
-              }
+              src={images.hero || defaultImage}
               alt="Forest Background"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 to-slate-800/95"></div>
-          </div>
-
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div
-              className={`text-center mb-16 ${getRevealClass(
-                "timeline-title"
-              )}`}
-              data-reveal-id="timeline-title"
-            >
-              <div className="inline-flex items-center gap-3 mb-6">
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent"></div>
-                <Mountain className="w-8 h-8 text-emerald-400" />
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent"></div>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent mb-4">
-                Journey Through Time
-              </h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-                Milestones in our preservation efforts
-              </p>
-            </div>
-
-            <div className="relative">
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-emerald-400 via-blue-400 to-purple-400 rounded-full"></div>
-
-              {timelineData.map((item, index) => (
-                <div
-                  key={item.id || index}
-                  className={`relative flex items-center ${
-                    index % 2 === 0 ? "justify-start" : "justify-end"
-                  } mb-12 ${getRevealClass(
-                    `timeline-${index + 1}`,
-                    index * 200
-                  )}`}
-                  data-reveal-id={`timeline-${index + 1}`}
-                >
-                  <div
-                    className={`w-1/2 ${index % 2 === 0 ? "pr-8" : "pl-8"} ${
-                      index % 2 === 0 ? "text-right" : "text-left"
-                    }`}
-                  >
-                    <div
-                      className={`group bg-slate-800/20 backdrop-blur-sm p-6 rounded-2xl border ${
-                        getColorClasses(item.color || "emerald").border
-                      } transition-all duration-500 hover:shadow-xl ${
-                        getColorClasses(item.color || "emerald").shadow
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        {item.icon && (
-                          <div className="flex-shrink-0">
-                            <div
-                              className={`w-12 h-12 ${
-                                getColorClasses(item.color || "emerald").bg
-                              } rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                            >
-                              {React.createElement(
-                                getIconComponent(item.icon),
-                                {
-                                  className: `w-6 h-6 ${
-                                    getColorClasses(item.color || "emerald")
-                                      .text
-                                  }`,
-                                }
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <div
-                            className={`text-sm font-medium ${
-                              getColorClasses(item.color || "emerald").text
-                            } mb-2`}
-                          >
-                            {item.year}
-                          </div>
-                          <h3 className="text-xl font-bold text-slate-200 mb-3">
-                            {item.title}
-                          </h3>
-                          <p className="text-slate-400 leading-relaxed">
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full border-4 border-slate-800 z-10"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Call to Action Section */}
-      {callToAction.title && (
-        <section className="py-20 px-4 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20" style={parallaxBgStyle}>
-            <img
-              src={
-                images.hero ||
-                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
-              }
-              alt="Forest Background"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-900/50 to-orange-900/50"></div>
-          </div>
-
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-10 left-10 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-10 right-10 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
           </div>
 
           <div className="max-w-4xl mx-auto text-center relative z-10">
@@ -898,8 +848,14 @@ const About = () => {
               </h2>
 
               {callToAction.subtitle && (
-                <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
                   {callToAction.subtitle}
+                </p>
+              )}
+
+              {callToAction.description && (
+                <p className="text-lg text-slate-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+                  {callToAction.description}
                 </p>
               )}
 
@@ -908,61 +864,59 @@ const About = () => {
                   {callToAction.buttons.map((button, index) => (
                     <button
                       key={index}
-                      className={`group px-8 py-4 ${
+                      className={`group inline-flex items-center gap-3 px-8 py-4 ${
                         button.primary
-                          ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
-                          : "bg-slate-800/20 backdrop-blur-sm border border-amber-400/30 text-amber-400 hover:border-amber-400/60"
-                      } rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg ${
-                        button.primary
-                          ? "hover:shadow-amber-500/25"
-                          : "hover:shadow-amber-500/10"
-                      }`}
+                          ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 hover:shadow-lg hover:shadow-amber-500/25"
+                          : "bg-slate-800/50 text-slate-300 border border-slate-600 hover:border-amber-400/50 hover:text-amber-400"
+                      } rounded-xl font-semibold transition-all duration-300 hover:scale-105 backdrop-blur-sm`}
                     >
-                      <span className="flex items-center gap-2">
-                        {button.icon &&
-                          React.createElement(getIconComponent(button.icon), {
-                            className: `w-5 h-5 ${
-                              button.primary ? "" : "text-amber-400"
-                            } group-hover:rotate-12 transition-transform duration-300`,
-                          })}
-                        {button.text}
-                      </span>
+                      <span>{button.text}</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </button>
                   ))}
                 </div>
               )}
+
+              {/* Decorative Elements */}
+              <div className="mt-16 flex justify-center items-center gap-8 opacity-60">
+                <div className="flex items-center gap-2">
+                  <TreePine className="w-6 h-6 text-emerald-400" />
+                  <span className="text-slate-400">Preserve Nature</span>
+                </div>
+                <div className="w-px h-6 bg-slate-600"></div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-6 h-6 text-blue-400" />
+                  <span className="text-slate-400">Unite Communities</span>
+                </div>
+                <div className="w-px h-6 bg-slate-600"></div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-6 h-6 text-purple-400" />
+                  <span className="text-slate-400">Global Impact</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
       )}
 
       {/* Footer */}
-      <footer className="py-12 px-4 bg-slate-900/50 backdrop-blur-sm border-t border-slate-700/50">
+      <footer className="py-12 px-4 bg-slate-900/50 backdrop-blur-sm border-t border-slate-800">
         <div className="max-w-6xl mx-auto text-center">
-          <div className="flex justify-center items-center gap-3 mb-6">
+          <div className="flex justify-center items-center gap-3 mb-4">
             <Crown className="w-8 h-8 text-amber-400" />
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
               Yaaku Heritage
-            </h3>
+            </span>
           </div>
-          <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-            Preserving our ancestral wisdom for future generations. Together, we
-            protect the sacred bond between the Yaaku people and Mukogodo
-            Forest.
+          <p className="text-slate-400 mb-6">
+            Preserving our ancient wisdom for future generations
           </p>
-          <div className="flex justify-center gap-6 text-slate-500">
-            <div className="flex items-center gap-2">
-              <TreePine className="w-4 h-4" />
-              <span className="text-sm">Forest Guardians</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              <span className="text-sm">Community United</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              <span className="text-sm">Heritage Protected</span>
-            </div>
+          <div className="flex justify-center gap-6 text-sm text-slate-500">
+            <span>© 2024 Yaaku Indigenous Community</span>
+            <span>•</span>
+            <span>Mukogodo Forest, Kenya</span>
+            <span>•</span>
+            <span>All Rights Reserved</span>
           </div>
         </div>
       </footer>

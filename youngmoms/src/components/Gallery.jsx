@@ -28,13 +28,17 @@ import {
   FolderOpen,
   ChevronDown,
   ChevronUp,
+  FolderPlus,
+  ArrowLeft,
 } from "lucide-react";
 
 const Gallery = () => {
   const [galleryItems, setGalleryItems] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [stats, setStats] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,8 +47,8 @@ const Gallery = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState({});
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const [newFolderName, setNewFolderName] = useState("");
 
   // Modal states
   const [showImageModal, setShowImageModal] = useState(false);
@@ -54,15 +58,16 @@ const Gallery = () => {
   // Refs for modal
   const modalRef = useRef(null);
   const addFormRef = useRef(null);
+  const createFolderRef = useRef(null);
 
   // Form state
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "family",
+    category: "",
     event: "",
     location: "",
-    photographer: "",
+    photographer: "Elphas Khamala",
     tags: "",
     images: null,
   });
@@ -127,21 +132,28 @@ const Gallery = () => {
     );
   };
 
-  // Fetch gallery items with pagination
-  const fetchGalleryItems = async (page = 1, append = false) => {
+  // Fetch gallery items with optional folder filter
+  const fetchGalleryItems = async (
+    page = 1,
+    append = false,
+    folderName = null
+  ) => {
     try {
       if (!append) setLoading(true);
       else setLoadingMore(true);
 
-      const response = await axios.get(
-        `${API_BASE}/view?page=${page}&limit=20`,
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const url = folderName
+        ? `${API_BASE}/view?page=${page}&limit=20&category=${encodeURIComponent(
+            folderName
+          )}`
+        : `${API_BASE}/view?page=${page}&limit=20`;
+
+      const response = await axios.get(url, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
 
       const newItems = response.data.data || [];
 
@@ -153,16 +165,6 @@ const Gallery = () => {
 
       setTotalPages(response.data.pages || 1);
       setCurrentPage(page);
-
-      // Initialize expanded categories for new items
-      if (!append) {
-        const categories = [...new Set(newItems.map((item) => item.category))];
-        const initialExpanded = {};
-        categories.forEach((cat) => {
-          initialExpanded[cat] = true;
-        });
-        setExpandedCategories(initialExpanded);
-      }
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -176,10 +178,30 @@ const Gallery = () => {
     }
   };
 
+  // Fetch unique folders/categories
+  const fetchFolders = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/view?page=1&limit=1000`, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      const items = response.data.data || [];
+      const uniqueFolders = [
+        ...new Set(items.map((item) => item.category).filter(Boolean)),
+      ];
+      setFolders(uniqueFolders);
+    } catch (err) {
+      console.error("Failed to fetch folders:", err);
+    }
+  };
+
   // Load more items
   const loadMoreItems = async () => {
     if (currentPage < totalPages && !loadingMore) {
-      await fetchGalleryItems(currentPage + 1, true);
+      await fetchGalleryItems(currentPage + 1, true, selectedFolder);
     }
   };
 
@@ -198,35 +220,41 @@ const Gallery = () => {
     }
   };
 
-  // Toggle category expansion
-  const toggleCategory = (category) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+  // Create new folder
+  const createFolder = () => {
+    if (!newFolderName.trim()) {
+      showErrorToast("Please enter a folder name", "📁");
+      return;
+    }
+
+    if (folders.includes(newFolderName.trim())) {
+      showErrorToast("Folder already exists", "📁");
+      return;
+    }
+
+    setFolders((prev) => [...prev, newFolderName.trim()]);
+    setNewFolderName("");
+    setShowCreateFolder(false);
+    showSuccessToast("Folder created successfully!", "📁");
   };
 
-  // Set active category for filtering
-  const setCategoryFilter = (category) => {
-    setActiveCategory((prev) => (prev === category ? null : category));
+  // Select folder
+  const selectFolder = (folderName) => {
+    setSelectedFolder(folderName);
+    setCurrentPage(1);
+    fetchGalleryItems(1, false, folderName);
   };
 
-  // Group items by category
-  const groupItemsByCategory = () => {
-    const grouped = {};
-    galleryItems.forEach((item) => {
-      if (!grouped[item.category]) {
-        grouped[item.category] = [];
-      }
-      grouped[item.category].push(item);
-    });
-    return grouped;
+  // Go back to folder view
+  const goBackToFolders = () => {
+    setSelectedFolder(null);
+    setCurrentPage(1);
+    fetchGalleryItems(1, false, null);
   };
 
-  // Filter items based on active category
-  const getFilteredItems = () => {
-    if (!activeCategory) return galleryItems;
-    return galleryItems.filter((item) => item.category === activeCategory);
+  // Count items in folder
+  const getFolderItemCount = (folderName) => {
+    return galleryItems.filter((item) => item.category === folderName).length;
   };
 
   // Modal functions
@@ -273,9 +301,17 @@ const Gallery = () => {
       ) {
         resetForm();
       }
+      if (
+        createFolderRef.current &&
+        !createFolderRef.current.contains(event.target) &&
+        showCreateFolder
+      ) {
+        setShowCreateFolder(false);
+        setNewFolderName("");
+      }
     };
 
-    if (showImageModal || showAddForm) {
+    if (showImageModal || showAddForm || showCreateFolder) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("touchstart", handleClickOutside);
     }
@@ -284,7 +320,7 @@ const Gallery = () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [showImageModal, showAddForm]);
+  }, [showImageModal, showAddForm, showCreateFolder]);
 
   // Keyboard navigation for modal
   useEffect(() => {
@@ -341,7 +377,18 @@ const Gallery = () => {
       });
 
       const result = response.data;
-      setGalleryItems((prev) => [result.data || result, ...prev]);
+      const newItem = result.data || result;
+
+      // Add to gallery items if we're viewing the same folder or all items
+      if (!selectedFolder || selectedFolder === newItem.category) {
+        setGalleryItems((prev) => [newItem, ...prev]);
+      }
+
+      // Update folders list if new category
+      if (newItem.category && !folders.includes(newItem.category)) {
+        setFolders((prev) => [...prev, newItem.category]);
+      }
+
       resetForm();
       fetchStats();
 
@@ -433,6 +480,7 @@ const Gallery = () => {
       );
       setEditingItem(null);
       resetForm();
+      fetchFolders(); // Refresh folders in case category changed
 
       toast.dismiss(loadingToastId);
       showSuccessToast("Gallery item updated successfully!", "🎯");
@@ -465,6 +513,7 @@ const Gallery = () => {
       });
       setGalleryItems((prev) => prev.filter((item) => item._id !== id));
       fetchStats();
+      fetchFolders(); // Refresh folders in case folder is now empty
 
       toast.dismiss(loadingToastId);
       showSuccessToast("Gallery item deleted successfully!", "🧹");
@@ -581,7 +630,7 @@ const Gallery = () => {
     setError(null);
 
     if (!formData.title || !formData.category) {
-      const errorMsg = "Title, Category, and Event are required";
+      const errorMsg = "Title and Folder are required";
       setError(errorMsg);
       showErrorToast(errorMsg, "⚠️");
       return;
@@ -614,10 +663,10 @@ const Gallery = () => {
     setFormData({
       title: "",
       description: "",
-      category: "family",
+      category: selectedFolder || "",
       event: "",
       location: "",
-      photographer: "",
+      photographer: "Elphas Khamala",
       tags: "",
       images: null,
     });
@@ -632,10 +681,10 @@ const Gallery = () => {
     setFormData({
       title: item.title || "",
       description: item.description || "",
-      category: item.category || "family",
+      category: item.category || "",
       event: item.event || "",
       location: item.location || "",
-      photographer: item.photographer || "",
+      photographer: item.photographer || "Elphas Khamala",
       tags: Array.isArray(item.tags) ? item.tags.join(", ") : item.tags || "",
       images: null,
     });
@@ -673,6 +722,7 @@ const Gallery = () => {
 
   useEffect(() => {
     fetchGalleryItems();
+    fetchFolders();
     fetchStats();
   }, []);
 
@@ -692,9 +742,6 @@ const Gallery = () => {
     );
   }
 
-  const groupedItems = groupItemsByCategory();
-  const categories = Object.keys(groupedItems).sort();
-
   return (
     <div className="w-full min-h-full bg-gradient-to-br from-red-50 via-white to-pink-50">
       <ToastContainer />
@@ -703,21 +750,47 @@ const Gallery = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-3">
-                Gallery Management
-              </h1>
-              <p className="text-gray-600 text-lg">
-                Manage your gallery images and create memorable collections
-              </p>
+            <div className="flex items-center gap-4">
+              {selectedFolder && (
+                <button
+                  onClick={goBackToFolders}
+                  className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+                  title="Back to folders"
+                >
+                  <ArrowLeft size={24} className="text-gray-600" />
+                </button>
+              )}
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-3">
+                  {selectedFolder
+                    ? `${selectedFolder} Gallery`
+                    : "Gallery Management"}
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  {selectedFolder
+                    ? `Images in ${selectedFolder} folder`
+                    : "Organize your images in custom folders"}
+                </p>
+              </div>
             </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-8 py-4 rounded-2xl flex items-center gap-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              <Plus size={24} />
-              <span className="font-semibold">Add New Item</span>
-            </button>
+            <div className="flex items-center gap-3">
+              {!selectedFolder && (
+                <button
+                  onClick={() => setShowCreateFolder(true)}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  <FolderPlus size={20} />
+                  <span className="font-medium">New Folder</span>
+                </button>
+              )}
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                <Plus size={20} />
+                <span className="font-medium">Add Images</span>
+              </button>
+            </div>
           </div>
 
           {/* Stats */}
@@ -725,10 +798,16 @@ const Gallery = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {[
                 {
-                  icon: ImageIcon,
-                  label: "Total Items",
-                  value: stats.totalItems || galleryItems.length,
+                  icon: Folder,
+                  label: "Total Folders",
+                  value: folders.length,
                   color: "from-blue-500 to-cyan-500",
+                },
+                {
+                  icon: ImageIcon,
+                  label: "Total Images",
+                  value: stats.totalItems || galleryItems.length,
+                  color: "from-green-500 to-emerald-500",
                 },
                 {
                   icon: Heart,
@@ -740,12 +819,6 @@ const Gallery = () => {
                   icon: Eye,
                   label: "Total Views",
                   value: stats.totalViews || 0,
-                  color: "from-green-500 to-emerald-500",
-                },
-                {
-                  icon: Tag,
-                  label: "Categories",
-                  value: stats.categoriesCount || 0,
                   color: "from-purple-500 to-violet-500",
                 },
               ].map((stat, index) => (
@@ -772,701 +845,688 @@ const Gallery = () => {
           )}
         </div>
 
-        {/* Category Navigation */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-4">
-            <button
-              onClick={() => setCategoryFilter(null)}
-              className={`px-6 py-3 rounded-xl flex items-center gap-3 transition-all ${
-                !activeCategory
-                  ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                  : "bg-white/80 hover:bg-white"
-              }`}
-            >
-              <span className="font-medium">All Categories</span>
-            </button>
-
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setCategoryFilter(category)}
-                className={`px-6 py-3 rounded-xl flex items-center gap-3 transition-all ${
-                  activeCategory === category
-                    ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                    : "bg-white/80 hover:bg-white"
-                }`}
-              >
-                <span className="font-medium capitalize">{category}</span>
-                <span className="text-sm bg-white/20 px-2 py-1 rounded-full">
-                  {groupedItems[category].length}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Image Modal */}
-        {showImageModal && modalItem && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div
-              ref={modalRef}
-              className="relative max-w-6xl max-h-[90vh] w-full"
-            >
-              {/* Close button */}
-              <button
-                onClick={closeImageModal}
-                className="absolute top-4 right-4 z-10 p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors text-white"
-              >
-                <X size={24} />
-              </button>
-
-              {/* Image container */}
-              <div className="relative bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden">
-                {modalItem.images && modalItem.images.length > 0 && (
-                  <div className="relative">
-                    <img
-                      src={
-                        modalItem.images[modalImageIndex]?.url ||
-                        getImageUrl(modalItem)
-                      }
-                      alt={modalItem.title}
-                      className="w-full max-h-[70vh] object-contain"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/800x600/cccccc/666666?text=Image+Not+Found";
-                      }}
-                    />
-
-                    {/* Navigation arrows */}
-                    {modalItem.images.length > 1 && (
-                      <>
-                        <button
-                          onClick={prevImage}
-                          disabled={modalImageIndex === 0}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                        >
-                          <ChevronLeft size={24} />
-                        </button>
-                        <button
-                          onClick={nextImage}
-                          disabled={
-                            modalImageIndex === modalItem.images.length - 1
-                          }
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                        >
-                          <ChevronRight size={24} />
-                        </button>
-                      </>
-                    )}
-
-                    {/* Image counter */}
-                    {modalItem.images.length > 1 && (
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-full text-white text-sm">
-                        {modalImageIndex + 1} / {modalItem.images.length}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Modal content */}
-                <div className="p-6 text-white">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold mb-2">
-                        {modalItem.title}
-                      </h3>
-                      {modalItem.description && (
-                        <p className="text-gray-200 mb-4">
-                          {modalItem.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6 text-sm">
-                      {modalItem.event && (
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          <span>{modalItem.event}</span>
-                        </div>
-                      )}
-                      {modalItem.location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin size={16} />
-                          <span>{modalItem.location}</span>
-                        </div>
-                      )}
-                      {modalItem.photographer && (
-                        <div className="flex items-center gap-2">
-                          <Camera size={16} />
-                          <span>{modalItem.photographer}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => likeGalleryItem(modalItem._id)}
-                        className="flex items-center gap-2 hover:text-red-300 transition-colors"
-                      >
-                        <Heart size={20} />
-                        <span>{modalItem.likes || 0}</span>
-                      </button>
-                      <div className="flex items-center gap-2">
-                        <Eye size={20} />
-                        <span>{modalItem.views || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add/Edit Form Modal */}
-        {showAddForm && (
+        {/* Create Folder Modal */}
+        {showCreateFolder && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div
-              ref={addFormRef}
-              className="bg-white/95 backdrop-blur-md rounded-3xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20"
+              ref={createFolderRef}
+              className="bg-white/95 backdrop-blur-md rounded-3xl p-8 w-full max-w-md shadow-2xl border border-white/20"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                  {editingItem ? "Edit Gallery Item" : "Add New Gallery Item"}
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  Create New Folder
                 </h2>
                 <button
-                  onClick={resetForm}
+                  onClick={() => {
+                    setShowCreateFolder(false);
+                    setNewFolderName("");
+                  }}
                   className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Title *
-                      </label>
-                      <input
-                        type="text"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        placeholder="Enter a descriptive title"
-                      />
-                    </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Folder Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    placeholder="Enter folder name"
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        createFolder();
+                      }
+                    }}
+                  />
+                </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Category *
-                      </label>
-                      <select
-                        name="category"
-                        value={formData.category}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                      >
-                        <option value="family">Family</option>
-                        <option value="events">Events</option>
-                        <option value="community">Community</option>
-                        <option value="celebrations">Celebrations</option>
-                      <option value="workshops">Workshops</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
+                <div className="flex gap-4 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowCreateFolder(false);
+                      setNewFolderName("");
+                    }}
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={createFolder}
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium flex items-center justify-center gap-2"
+                  >
+                    <FolderPlus size={20} />
+                    Create Folder
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Event *
-                      </label>
-                      <input
-                        type="text"
-                        name="event"
-                        value={formData.event}
-                        onChange={handleInputChange}
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        placeholder="Event name"
-                      />
-                    </div>
+        {/* Folders/Gallery Content */}
+        {!selectedFolder ? (
+          // Folder View
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 mb-6">
+              <FolderOpen size={24} className="text-gray-600" />
+              <h2 className="text-2xl font-bold text-gray-800">Your Folders</h2>
+            </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Location
-                      </label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        placeholder="Event location"
-                      />
+            {folders.length === 0 ? (
+              <div className="text-center py-16">
+                <Folder size={64} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  No folders yet
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Create your first folder to organize your images
+                </p>
+                <button
+                  onClick={() => setShowCreateFolder(true)}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg mx-auto"
+                >
+                  <FolderPlus size={20} />
+                  Create First Folder
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {folders.map((folder) => (
+                  <div
+                    key={folder}
+                    onClick={() => selectFolder(folder)}
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-blue-200 group"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 group-hover:from-blue-600 group-hover:to-cyan-600 transition-all duration-300">
+                        <Folder size={24} className="text-white" />
+                      </div>
+                      <span className="text-2xl font-bold text-gray-800">
+                        {getFolderItemCount(folder)}
+                      </span>
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Photographer
-                      </label>
-                      <input
-                        type="text"
-                        name="photographer"
-                        value={formData.photographer}
-                        onChange={handleInputChange}
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        placeholder="Photographer name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Tags
-                      </label>
-                      <input
-                        type="text"
-                        name="tags"
-                        value={formData.tags}
-                        onChange={handleInputChange}
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        placeholder="Comma-separated tags"
-                      />
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                      {folder}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {getFolderItemCount(folder)}{" "}
+                      {getFolderItemCount(folder) === 1 ? "image" : "images"}
+                    </p>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          // Gallery Items View
+          <div className="space-y-6">
+            {galleryItems.length === 0 ? (
+              <div className="text-center py-16">
+                <ImageIcon size={64} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  No images in this folder
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Add some images to get started
+                </p>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg mx-auto"
+                >
+                  <Plus size={20} />
+                  Add First Image
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {galleryItems.map((item) => (
+                    <div
+                      key={item._id}
+                      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-white/20 group"
+                    >
+                      <div className="relative">
+                        <img
+                          src={getImageUrl(item)}
+                          alt={item.title}
+                          className="w-full h-48 object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                          onClick={() => openImageModal(item)}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
 
+                        {/* Image count badge */}
+                        {getImageCount(item) > 1 && (
+                          <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1">
+                            <Camera size={12} />
+                            {getImageCount(item)}
+                          </div>
+                        )}
+
+                        {/* Action buttons */}
+                        <div className="absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEdit(item);
+                            }}
+                            className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors shadow-lg"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteGalleryItem(item._id);
+                            }}
+                            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
+                          {item.title}
+                        </h3>
+
+                        {item.description && (
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                          {item.event && (
+                            <div className="flex items-center gap-1">
+                              <Calendar size={14} />
+                              <span className="truncate">{item.event}</span>
+                            </div>
+                          )}
+                          {item.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin size={14} />
+                              <span className="truncate">{item.location}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {item.photographer && (
+                          <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
+                            <User size={14} />
+                            <span className="truncate">
+                              {item.photographer}
+                            </span>
+                          </div>
+                        )}
+
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {item.tags.slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {item.tags.length > 3 && (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs">
+                                +{item.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              likeGalleryItem(item._id);
+                            }}
+                            className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors"
+                          >
+                            <Heart size={16} />
+                            <span className="text-sm">{item.likes || 0}</span>
+                          </button>
+                          <div className="flex items-center gap-2 text-gray-500">
+                            <Eye size={16} />
+                            <span className="text-sm">{item.views || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Load More Button */}
+                {currentPage < totalPages && (
+                  <div className="text-center pt-8">
+                    <button
+                      onClick={loadMoreItems}
+                      disabled={loadingMore}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl flex items-center gap-2 mx-auto transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      {loadingMore ? (
+                        <Loader2 size={20} className="animate-spin" />
+                      ) : (
+                        <Plus size={20} />
+                      )}
+                      <span className="font-medium">
+                        {loadingMore ? "Loading..." : "Load More"}
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Add/Edit Form Modal - Compact Version */}
+        {showAddForm && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div
+              ref={addFormRef}
+              className="bg-white/95 backdrop-blur-md rounded-3xl p-6 w-full max-w-2xl shadow-2xl border border-white/20 my-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                  {editingItem ? "Edit Gallery Item" : "Add New Gallery Item"}
+                </h2>
+                <button
+                  onClick={resetForm}
+                  className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2">
+                  <AlertCircle size={16} className="text-red-500" />
+                  <span className="text-red-700 text-sm">{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Description
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Title *
                     </label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
+                    <input
+                      type="text"
+                      name="title"
+                      value={formData.title}
                       onChange={handleInputChange}
-                      rows={4}
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
-                      placeholder="Describe the event or memory"
+                      required
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      placeholder="Enter title"
                     />
                   </div>
 
-                  {/* Image Upload */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      Images {!editingItem && "*"}
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Folder *
                     </label>
-                    <div
-                      className={`relative border-2 border-dashed rounded-2xl p-8 transition-all duration-300 ${
-                        dragActive
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-300 hover:border-red-400 bg-gray-50/50"
-                      }`}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
                     >
-                      <input
-                        type="file"
-                        name="images"
-                        onChange={handleInputChange}
-                        multiple
-                        accept="image/*"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                      <div className="text-center">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-lg font-medium text-gray-900 mb-2">
-                          Drop images here or click to upload
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Support for multiple images (JPG, PNG, GIF)
-                        </p>
-                      </div>
-                    </div>
+                      <option value="">Select folder</option>
+                      {folders.map((folder) => (
+                        <option key={folder} value={folder}>
+                          {folder}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-                    {/* Image Previews */}
-                    {imagePreview.length > 0 && (
-                      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {imagePreview.map((preview, index) => (
-                          <div
-                            key={index}
-                            className="relative group rounded-xl overflow-hidden shadow-lg"
-                          >
-                            <img
-                              src={preview.url}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-24 object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                              <CheckCircle className="text-white" size={20} />
-                            </div>
-                            <div className="absolute bottom-1 left-1 right-1">
-                              <div className="bg-black/60 backdrop-blur-sm rounded px-2 py-1 text-xs text-white truncate">
-                                {preview.name}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={2}
+                    className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
+                    placeholder="Enter description"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Event
+                    </label>
+                    <input
+                      type="text"
+                      name="event"
+                      value={formData.event}
+                      onChange={handleInputChange}
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      placeholder="Enter event name"
+                    />
                   </div>
 
-                  {/* Error Display */}
-                  {error && (
-                    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-                      <div className="flex items-center">
-                        <AlertCircle className="text-red-500 mr-3" size={20} />
-                        <p className="text-red-700 font-medium">{error}</p>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      placeholder="Enter location"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Photographer
+                    </label>
+                    <input
+                      type="text"
+                      name="photographer"
+                      value={formData.photographer}
+                      onChange={handleInputChange}
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      placeholder="Enter photographer name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Tags
+                    </label>
+                    <input
+                      type="text"
+                      name="tags"
+                      value={formData.tags}
+                      onChange={handleInputChange}
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      placeholder="Enter tags separated by commas"
+                    />
+                  </div>
+                </div>
+
+                {/* Image Upload - Compact Version */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Images {!editingItem && "*"}
+                  </label>
+                  <div
+                    className={`border-2 border-dashed rounded-xl p-4 text-center transition-all duration-200 ${
+                      dragActive
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-300 hover:border-red-400"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      name="images"
+                      onChange={handleInputChange}
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <Upload size={32} className="text-gray-400" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, GIF up to 10MB each
+                        </p>
                       </div>
+                    </label>
+                  </div>
+
+                  {/* Image Preview - Compact */}
+                  {imagePreview.length > 0 && (
+                    <div className="mt-3 grid grid-cols-3 md:grid-cols-6 gap-2">
+                      {imagePreview.map((preview, index) => (
+                        <div
+                          key={index}
+                          className="relative bg-gray-100 rounded-lg overflow-hidden"
+                        >
+                          <img
+                            src={preview.url}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-16 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <CheckCircle size={16} className="text-white" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
+                </div>
 
-                  {/* Form Actions */}
-                  <div className="flex gap-4 pt-6 border-t">
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="animate-spin" size={20} />
-                          {editingItem ? "Updating..." : "Creating..."}
-                        </>
-                      ) : (
-                        <>
-                          <Save size={20} />
-                          {editingItem ? "Update Item" : "Create Item"}
-                        </>
-                      )}
-                    </button>
-                  </div>
+                {/* Form Actions - Compact */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-2 rounded-xl transition-all duration-300 font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    <span>
+                      {isSubmitting
+                        ? "Saving..."
+                        : editingItem
+                        ? "Update Item"
+                        : "Create Item"}
+                    </span>
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* Gallery Grid */}
-        {activeCategory ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {getFilteredItems().map((item) => (
-              <div
-                key={item._id}
-                className="group bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/20 hover:scale-105"
+        {/* Image Modal */}
+        {showImageModal && modalItem && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div
+              ref={modalRef}
+              className="relative bg-white/95 backdrop-blur-md rounded-3xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20"
+            >
+              <button
+                onClick={closeImageModal}
+                className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
               >
-                {/* Image Container */}
-                <div className="relative overflow-hidden">
+                <X size={24} />
+              </button>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Image Section */}
+                <div className="relative">
                   <img
-                    src={getImageUrl(item)}
-                    alt={item.title}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-                    onClick={() => openImageModal(item, 0)}
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/400x300/cccccc/666666?text=No+Image";
-                    }}
+                    src={
+                      modalItem.images && modalItem.images[modalImageIndex]
+                        ? modalItem.images[modalImageIndex].url
+                        : getImageUrl(modalItem)
+                    }
+                    alt={modalItem.title}
+                    className="w-full h-auto rounded-2xl shadow-lg max-h-[500px] object-contain"
                   />
 
-                  {/* Image count badge */}
-                  {getImageCount(item) > 1 && (
-                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
-                      +{getImageCount(item) - 1} more
+                  {/* Image Navigation */}
+                  {modalItem.images && modalItem.images.length > 1 && (
+                    <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between p-4">
+                      <button
+                        onClick={prevImage}
+                        disabled={modalImageIndex === 0}
+                        className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft size={24} />
+                      </button>
+                      <button
+                        onClick={nextImage}
+                        disabled={
+                          modalImageIndex === modalItem.images.length - 1
+                        }
+                        className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight size={24} />
+                      </button>
                     </div>
                   )}
 
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  {/* Image Counter */}
+                  {modalItem.images && modalItem.images.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                      {modalImageIndex + 1} / {modalItem.images.length}
+                    </div>
+                  )}
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                      {modalItem.title}
+                    </h2>
+                    {modalItem.description && (
+                      <p className="text-gray-600 leading-relaxed">
+                        {modalItem.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {modalItem.category && (
+                      <div className="flex items-center gap-2">
+                        <Tag size={16} className="text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {modalItem.category}
+                        </span>
+                      </div>
+                    )}
+                    {modalItem.event && (
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {modalItem.event}
+                        </span>
+                      </div>
+                    )}
+                    {modalItem.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin size={16} className="text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {modalItem.location}
+                        </span>
+                      </div>
+                    )}
+                    {modalItem.photographer && (
+                      <div className="flex items-center gap-2">
+                        <User size={16} className="text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {modalItem.photographer}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {modalItem.tags && modalItem.tags.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        Tags
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {modalItem.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => openImageModal(item, 0)}
-                      className="bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 transition-colors"
+                      onClick={() => likeGalleryItem(modalItem._id)}
+                      className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors px-4 py-2 rounded-xl hover:bg-red-50"
                     >
-                      <Eye className="text-white" size={24} />
+                      <Heart size={20} />
+                      <span>{modalItem.likes || 0} likes</span>
+                    </button>
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <Eye size={20} />
+                      <span>{modalItem.views || 0} views</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        closeImageModal();
+                        startEdit(modalItem);
+                      }}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 font-medium"
+                    >
+                      <Edit size={18} />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        closeImageModal();
+                        deleteGalleryItem(modalItem._id);
+                      }}
+                      className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 font-medium"
+                    >
+                      <Trash2 size={18} />
+                      Delete
                     </button>
                   </div>
                 </div>
-
-                {/* Card Content */}
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm line-clamp-2">
-                      {item.description || "No description available"}
-                    </p>
-                  </div>
-
-                  {/* Metadata */}
-                  <div className="space-y-2 mb-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} />
-                      <span className="font-medium">{item.event}</span>
-                    </div>
-                    {item.location && (
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} />
-                        <span>{item.location}</span>
-                      </div>
-                    )}
-                    {item.photographer && (
-                      <div className="flex items-center gap-2">
-                        <Camera size={14} />
-                        <span>{item.photographer}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  {item.tags && item.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {item.tags.slice(0, 3).map((tag, tagIndex) => (
-                        <span
-                          key={tagIndex}
-                          className="bg-gradient-to-r from-red-100 to-pink-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                      {item.tags.length > 3 && (
-                        <span className="text-gray-500 text-xs font-medium">
-                          +{item.tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <button
-                        onClick={() => likeGalleryItem(item._id)}
-                        className="flex items-center gap-1 hover:text-red-500 transition-colors"
-                      >
-                        <Heart size={16} />
-                        <span>{item.likes || 0}</span>
-                      </button>
-                      <div className="flex items-center gap-1">
-                        <Eye size={16} />
-                        <span>{item.views || 0}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => startEdit(item)}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit item"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteGalleryItem(item._id)}
-                        className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete item"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {categories.map((category) => (
-              <div
-                key={category}
-                className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg overflow-hidden border border-white/20"
-              >
-                <button
-                  onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center justify-between p-6 hover:bg-white/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    {expandedCategories[category] ? (
-                      <FolderOpen className="text-red-500" size={24} />
-                    ) : (
-                      <Folder className="text-red-500" size={24} />
-                    )}
-                    <h3 className="text-xl font-bold text-gray-900 capitalize">
-                      {category}
-                    </h3>
-                    <span className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded-full">
-                      {groupedItems[category].length} items
-                    </span>
-                  </div>
-                  {expandedCategories[category] ? (
-                    <ChevronUp size={24} className="text-gray-500" />
-                  ) : (
-                    <ChevronDown size={24} className="text-gray-500" />
-                  )}
-                </button>
-
-                {expandedCategories[category] && (
-                  <div className="p-6 pt-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {groupedItems[category].map((item) => (
-                        <div
-                          key={item._id}
-                          className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-100 hover:scale-[1.02]"
-                        >
-                          {/* Image Container */}
-                          <div className="relative overflow-hidden">
-                            <img
-                              src={getImageUrl(item)}
-                              alt={item.title}
-                              className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-                              onClick={() => openImageModal(item, 0)}
-                              onError={(e) => {
-                                e.target.src =
-                                  "https://via.placeholder.com/400x300/cccccc/666666?text=No+Image";
-                              }}
-                            />
-
-                            {/* Image count badge */}
-                            {getImageCount(item) > 1 && (
-                              <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-medium">
-                                +{getImageCount(item) - 1}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Card Content */}
-                          <div className="p-4">
-                            <div className="mb-3">
-                              <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
-                                {item.title}
-                              </h3>
-                              <p className="text-gray-600 text-xs line-clamp-2">
-                                {item.description || "No description"}
-                              </p>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                              <div className="flex items-center gap-3 text-xs text-gray-600">
-                                <button
-                                  onClick={() => likeGalleryItem(item._id)}
-                                  className="flex items-center gap-1 hover:text-red-500 transition-colors"
-                                >
-                                  <Heart size={14} />
-                                  <span>{item.likes || 0}</span>
-                                </button>
-                                <div className="flex items-center gap-1">
-                                  <Eye size={14} />
-                                  <span>{item.views || 0}</span>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => startEdit(item)}
-                                  className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                  title="Edit item"
-                                >
-                                  <Edit size={14} />
-                                </button>
-                                <button
-                                  onClick={() => openImageModal(item, 0)}
-                                  className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                  title="View item"
-                                >
-                                  <Eye size={14} />
-                                </button>
-                                <button
-                                  onClick={() => deleteGalleryItem(item._id)}
-                                  className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                  title="Delete item"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Load More Button */}
-        {currentPage < totalPages && (
-          <div className="text-center mt-12">
-            <button
-              onClick={loadMoreItems}
-              disabled={loadingMore}
-              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-500 text-white px-8 py-4 rounded-2xl transition-all duration-300 font-medium flex items-center gap-3 mx-auto"
-            >
-              {loadingMore ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <Plus size={20} />
-                  Load More Images
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && galleryItems.length === 0 && (
-          <div className="text-center py-16">
-            <div className="relative mb-6">
-              <ImageIcon className="mx-auto h-24 w-24 text-gray-300" />
-              <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-400" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              No Gallery Items Yet
-            </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Start building your beautiful gallery by adding your first image
-              collection.
-            </p>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-8 py-4 rounded-2xl transition-all font-medium flex items-center gap-3 mx-auto"
-            >
-              <Plus size={20} />
-              Add Your First Item
-            </button>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-16">
-            <AlertCircle className="mx-auto h-24 w-24 text-red-400 mb-6" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Oops! Something went wrong
-            </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">{error}</p>
-            <button
-              onClick={() => fetchGalleryItems()}
-              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-8 py-4 rounded-2xl transition-all font-medium"
-            >
-              Try Again
-            </button>
           </div>
         )}
       </div>

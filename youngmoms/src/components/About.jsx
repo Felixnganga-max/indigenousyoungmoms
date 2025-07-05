@@ -197,8 +197,17 @@ const About = () => {
 
       const method = editMode && currentAbout ? "PUT" : "POST";
 
+      // For PUT requests, merge with existing data to avoid validation errors
       const payload =
-        editMode && currentAbout ? { [sectionName]: sectionData } : formData;
+        editMode && currentAbout
+          ? {
+              ...formData, // Include all existing data
+              [sectionName]: sectionData, // Updated section
+              lastUpdatedBy: "Admin", // Match backend expectation
+            }
+          : formData;
+
+      console.log("Sending payload:", payload); // Debugging
 
       const response = await fetch(url, {
         method: method,
@@ -208,35 +217,32 @@ const About = () => {
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        showMessage(
-          "success",
-          `${sectionName} saved successfully!`,
-          sectionName
-        );
-
-        if (!editMode) {
-          setCurrentAbout(result);
-          setEditMode(true);
-        }
-
-        await fetchAllAbout();
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        showMessage(
-          "error",
-          errorData.message || `Failed to save ${sectionName}`,
-          sectionName
-        );
+        console.error("Error details:", errorData); // More detailed error logging
+        throw new Error(errorData.message || `Failed to save ${sectionName}`);
       }
+
+      const result = await response.json();
+      showMessage("success", `${sectionName} saved successfully!`, sectionName);
+
+      if (!editMode) {
+        setCurrentAbout(result);
+        setEditMode(true);
+      }
+
+      await fetchAllAbout();
     } catch (error) {
-      showMessage("error", "Network error. Please try again.", sectionName);
+      console.error("Save error:", error);
+      showMessage(
+        "error",
+        error.message || "Network error. Please try again.",
+        sectionName
+      );
     } finally {
       setLoading((prev) => ({ ...prev, [sectionName]: false }));
     }
   };
-
   const loadAboutForEdit = (about) => {
     setFormData(about);
     setCurrentAbout(about);
@@ -1062,9 +1068,12 @@ const About = () => {
                 type="button"
                 onClick={() =>
                   addArrayItem("historyContent.sections", {
+                    id: "", // Added id field
                     title: "",
-                    description: "",
-                    imageUrl: "",
+                    content: "", // Changed from description to content
+                    icon: "", // Added icon field
+                    color: "amber", // Added color field with default
+                    alwaysVisible: false, // Added alwaysVisible field
                   })
                 }
                 className="flex items-center space-x-2 px-3 py-1 bg-purple-500 text-white rounded-md hover:bg-purple-600 text-sm"
@@ -1079,7 +1088,21 @@ const About = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <input
                     type="text"
-                    value={section.title}
+                    value={section.id || ""}
+                    onChange={(e) =>
+                      updateArrayItem(
+                        "historyContent.sections",
+                        index,
+                        "id",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Section ID"
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <input
+                    type="text"
+                    value={section.title || ""}
                     onChange={(e) =>
                       updateArrayItem(
                         "historyContent.sections",
@@ -1091,33 +1114,84 @@ const About = () => {
                     placeholder="Section title"
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
-                  <input
-                    type="url"
-                    value={section.imageUrl}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                  <select
+                    value={section.icon || ""}
                     onChange={(e) =>
                       updateArrayItem(
                         "historyContent.sections",
                         index,
-                        "imageUrl",
+                        "icon",
                         e.target.value
                       )
                     }
-                    placeholder="Image URL"
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
+                  >
+                    <option value="">Select an icon</option>
+                    {iconOptions.map((icon) => (
+                      <option key={icon} value={icon}>
+                        {icon}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={section.color || "amber"}
+                    onChange={(e) =>
+                      updateArrayItem(
+                        "historyContent.sections",
+                        index,
+                        "color",
+                        e.target.value
+                      )
+                    }
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    {colorOptions.map((color) => (
+                      <option key={color} value={color}>
+                        {color}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                <div className="flex items-center mb-3">
+                  <input
+                    type="checkbox"
+                    id={`alwaysVisible-${index}`}
+                    checked={section.alwaysVisible || false}
+                    onChange={(e) =>
+                      updateArrayItem(
+                        "historyContent.sections",
+                        index,
+                        "alwaysVisible",
+                        e.target.checked
+                      )
+                    }
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor={`alwaysVisible-${index}`}
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    Always Visible
+                  </label>
+                </div>
+
                 <div className="flex space-x-2">
                   <textarea
-                    value={section.description}
+                    value={section.content || ""}
                     onChange={(e) =>
                       updateArrayItem(
                         "historyContent.sections",
                         index,
-                        "description",
+                        "content",
                         e.target.value
                       )
                     }
-                    placeholder="Section description"
+                    placeholder="Section content"
                     rows={3}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
