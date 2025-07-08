@@ -20,10 +20,43 @@ import { assets } from "../assets/assets";
 const Hero = () => {
   const [scrollY, setScrollY] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [loadedImages, setLoadedImages] = useState({});
 
   // Hero images array
   const heroImages = [heroImage, heroImage2, heroImage1];
+
+  // Preload all images immediately
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagePromises = heroImages.map((src, index) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            setLoadedImages((prev) => ({ ...prev, [index]: true }));
+            resolve(src);
+          };
+          img.onerror = reject;
+          // Set high priority for the first image
+          if (index === 0) {
+            img.loading = "eager";
+          }
+          img.src = src;
+        });
+      });
+
+      try {
+        await Promise.all(imagePromises);
+        setImagesLoaded(true);
+      } catch (error) {
+        console.error("Error preloading images:", error);
+        // Still show content even if some images fail
+        setImagesLoaded(true);
+      }
+    };
+
+    preloadImages();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -31,19 +64,16 @@ const Hero = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Set loaded state immediately
+  // Auto-slide functionality - only start after images are loaded
   useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+    if (!imagesLoaded) return;
 
-  // Auto-slide functionality
-  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [heroImages.length, imagesLoaded]);
 
   // Refined parallax calculations
   const scrollProgress = Math.min(scrollY / (window.innerHeight * 0.6), 1);
@@ -63,22 +93,28 @@ const Hero = () => {
     <>
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden">
-        {/* Hero Background Images Slider - NO OVERLAY */}
+        {/* Loading State */}
+        {!imagesLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 z-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              {/* <p className="text-white text-sm">Loading images...</p> */}
+            </div>
+          </div>
+        )}
+
+        {/* Hero Background Images Slider */}
         <div className="absolute inset-0 z-0">
           {heroImages.map((image, index) => (
             <div
               key={index}
-              className={`absolute inset-0 ${
-                index === currentImageIndex ? "opacity-100" : "opacity-0"
-              } ${
-                index === 0 && !isLoaded
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentImageIndex && imagesLoaded
                   ? "opacity-100"
-                  : index !== currentImageIndex
-                  ? "transition-opacity duration-2000 ease-in-out"
-                  : "transition-opacity duration-2000 ease-in-out"
+                  : "opacity-0"
               }`}
               style={{
-                backgroundImage: `url(${image})`,
+                backgroundImage: loadedImages[index] ? `url(${image})` : "none",
                 backgroundSize: "cover",
                 backgroundPosition: "center center",
                 backgroundRepeat: "no-repeat",
@@ -86,33 +122,42 @@ const Hero = () => {
               }}
             />
           ))}
+
+          {/* Fallback gradient background */}
+          {!imagesLoaded && (
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900" />
+          )}
         </div>
 
         {/* Professional Navigation Controls */}
-        <div className="hidden lg:flex absolute top-1/2 left-8 transform -translate-y-1/2 z-20">
-          <button
-            onClick={prevImage}
-            className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
-            aria-label="Previous image"
-          >
-            <ChevronLeft className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
-          </button>
-        </div>
+        {imagesLoaded && (
+          <>
+            <div className="hidden lg:flex absolute top-1/2 left-8 transform -translate-y-1/2 z-20">
+              <button
+                onClick={prevImage}
+                className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
+              </button>
+            </div>
 
-        <div className="hidden lg:flex absolute top-1/2 right-8 transform -translate-y-1/2 z-20">
-          <button
-            onClick={nextImage}
-            className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
-            aria-label="Next image"
-          >
-            <ChevronRight className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
-          </button>
-        </div>
+            <div className="hidden lg:flex absolute top-1/2 right-8 transform -translate-y-1/2 z-20">
+              <button
+                onClick={nextImage}
+                className="group bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 hover:border-white/20 text-white p-3 rounded-full transition-all duration-300 hover:scale-105"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-5 h-5 group-hover:text-blue-300 transition-colors" />
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Main Content Container */}
         <div className="relative z-10 flex items-center min-h-screen">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full py-24">
-            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left  rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
+            <div className="max-w-5xl mx-auto lg:mx-0 lg:ml-0 text-center lg:text-left rounded-3xl p-8 border border-white/10 lg:mr-auto lg:max-w-3xl">
               {/* Professional Badge */}
               <div className="inline-flex items-center space-x-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-8 py-4 mb-12 shadow-lg">
                 <div className="flex items-center space-x-2">
@@ -233,20 +278,22 @@ const Hero = () => {
         </div>
 
         {/* Refined Image Indicators */}
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20 flex space-x-4">
-          {heroImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentImageIndex
-                  ? "bg-blue-400 scale-125 shadow-md"
-                  : "bg-white/30 hover:bg-white/50 hover:scale-110"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
+        {imagesLoaded && (
+          <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20 flex space-x-4">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? "bg-blue-400 scale-125 shadow-md"
+                    : "bg-white/30 hover:bg-white/50 hover:scale-110"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Professional Scroll Indicator */}
         <div className="hidden sm:block absolute bottom-8 right-12 z-10">

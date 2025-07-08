@@ -106,14 +106,22 @@ const WebsiteLoader = () => {
   );
 };
 
-// Main App Component with Loader
-const App = () => {
+// Home Page Wrapper with Loader
+const HomeWithLoader = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const location = useLocation();
-  const isDashboard = location.pathname === "/dashboard";
+  const [hasVisited, setHasVisited] = useState(false);
 
   useEffect(() => {
-    // Load assets including logo
+    // Check if user has visited before
+    const visitedBefore = sessionStorage.getItem("hasVisitedHome");
+
+    if (visitedBefore) {
+      setHasVisited(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // First time visit - show loader
     const loadAssets = async () => {
       try {
         // Load your logo and other assets
@@ -130,26 +138,41 @@ const App = () => {
         // Minimum loading time for smooth UX
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
+        // Mark as visited for this session
+        sessionStorage.setItem("hasVisitedHome", "true");
+        setHasVisited(true);
         setIsLoading(false);
       } catch (error) {
         console.error("Loading failed:", error);
         // Still proceed even if logo fails to load
-        setTimeout(() => setIsLoading(false), 3000);
+        setTimeout(() => {
+          sessionStorage.setItem("hasVisitedHome", "true");
+          setHasVisited(true);
+          setIsLoading(false);
+        }, 3000);
       }
     };
 
     loadAssets();
   }, []);
 
-  if (isLoading) {
+  if (isLoading && !hasVisited) {
     return <WebsiteLoader />;
   }
+
+  return <Home />;
+};
+
+// Main App Component
+const App = () => {
+  const location = useLocation();
+  const isDashboard = location.pathname === "/dashboard";
 
   return (
     <div>
       {!isDashboard && <Navigation />}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomeWithLoader />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/missions" element={<Mission />} />
         <Route path="/projects" element={<Projects />} />
