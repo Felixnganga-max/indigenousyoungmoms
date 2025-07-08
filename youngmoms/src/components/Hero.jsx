@@ -12,6 +12,9 @@ import {
   Shield,
   Heart,
 } from "lucide-react";
+import heroImage from "../assets/hero.jpg";
+import heroImage1 from "../assets/hero1.jpg";
+import heroImage2 from "../assets/hero2.jpg";
 import { assets } from "../assets/assets";
 
 const Hero = () => {
@@ -20,7 +23,7 @@ const Hero = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Hero images array
-  const heroImages = [assets.heroImage, assets.heroImage2, assets.heroImage1];
+  const heroImages = [heroImage, heroImage2, heroImage1];
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
