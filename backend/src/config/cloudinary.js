@@ -31,7 +31,7 @@ const upload = multer({
       cb(new Error("Only image files are allowed!"), false);
     }
   },
-}).array("images", 10); // 'images' is the field name, max 5 files
+}).array("images", 10);
 
 module.exports = {
   cloudinary,
